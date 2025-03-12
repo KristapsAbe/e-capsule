@@ -45,7 +45,7 @@ function App() {
   const fetchFriendRequestCount = useCallback(async () => {
     try {
       const token = localStorage.getItem('access_token');
-      const response = await fetch('http://127.0.0.1:8000/api/friends/requests', {
+      const response = await fetch('https://istaisprojekts-main-lixsd6.laravel.cloud/api/friends/requests', {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Accept': 'application/json',

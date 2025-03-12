@@ -12,7 +12,7 @@ const CapsuleStatsChart = () => {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const response = await fetch('http://127.0.0.1:8000/api/capsules/monthly-stats');
+        const response = await fetch('https://istaisprojekts-main-lixsd6.laravel.cloud/api/capsules/monthly-stats');
         if (!response.ok) {
           throw new Error('Failed to fetch stats');
         }

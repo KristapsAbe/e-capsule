@@ -152,7 +152,7 @@ function CapsuleCreation() {
                 sharedWithCount: formData.sharedWith.length
             });
 
-            const response = await fetch('http://127.0.0.1:8000/api/capsule/create', {
+            const response = await fetch('https://istaisprojekts-main-lixsd6.laravel.cloud/api/capsule/create', {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,

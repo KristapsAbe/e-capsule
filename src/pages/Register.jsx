@@ -29,7 +29,7 @@ function Register() {
         setSuccess('');
 
         try {
-            const response = await fetch('http://localhost:8000/api/register', {
+            const response = await fetch('https://istaisprojekts-main-lixsd6.laravel.cloud/api/register', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -65,7 +65,7 @@ function Register() {
         setSuccess('');
 
         try {
-            const response = await fetch('http://127.0.0.1:8000/api/verify-email', {
+            const response = await fetch('https://istaisprojekts-main-lixsd6.laravel.cloud/api/verify-email', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
