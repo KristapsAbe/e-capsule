@@ -60,7 +60,7 @@ const UserModal = memo(({ user, onClose, onSendRequest, isPending }) => {
           throw new Error('No access token found');
         }
 
-        const url = `http://127.0.0.1:8000/api/friends/${user.id}/capsules`;
+        const url = `https://istaisprojekts-main-lixsd6.laravel.cloud/api/friends/${user.id}/capsules`;
         console.log('Fetching capsules from:', url);
 
         const response = await axios.get(url, {
@@ -530,7 +530,7 @@ const FriendsPage = () => {
 
       try {
         const response = await fetch(
-            `http://127.0.0.1:8000/api/friends`,
+            `https://istaisprojekts-main-lixsd6.laravel.cloud/api/friends`,
             {
               headers: {
                 'Authorization': `Bearer ${token}`,
@@ -624,7 +624,7 @@ const FriendsPage = () => {
     }
 
     try {
-      const response = await fetch('http://127.0.0.1:8000/api/friends/request', {
+      const response = await fetch('https://istaisprojekts-main-lixsd6.laravel.cloud/api/friends/request', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

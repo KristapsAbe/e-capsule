@@ -49,7 +49,7 @@ const Profile = () => {
 
         const fetchUserData = async () => {
             try {
-                const response = await fetch('http://127.0.0.1:8000/api/user', {
+                const response = await fetch('https://istaisprojekts-main-lixsd6.laravel.cloud/api/user', {
                     headers: {
                         'Authorization': `Bearer ${token}`,
                         'Accept': 'application/json',
@@ -60,7 +60,7 @@ const Profile = () => {
                 // Add this line to set the user_id in localStorage
                 localStorage.setItem('user_id', data.id.toString());
                 if (data.profile_image) {
-                    setImgSrc(`http://127.0.0.1:8000/storage/${data.profile_image}`);
+                    setImgSrc(`https://istaisprojekts-main-lixsd6.laravel.cloud/storage/${data.profile_image}`);
                 }
             } catch (err) {
                 setErrors(prev => ({...prev, user: 'Failed to fetch user data'}));
@@ -73,7 +73,7 @@ const Profile = () => {
         };
         const fetchAcceptedFriends = async () => {
             try {
-                const response = await fetch('http://127.0.0.1:8000/api/friends/accepted', {
+                const response = await fetch('https://istaisprojekts-main-lixsd6.laravel.cloud/api/friends/accepted', {
                     headers: {
                         'Authorization': `Bearer ${token}`,
                         'Accept': 'application/json',
@@ -97,10 +97,10 @@ const Profile = () => {
         const fetchCounts = async () => {
             try {
                 const [friendsRes, capsulesRes] = await Promise.all([
-                    fetch('http://127.0.0.1:8000/api/friends/count', {
+                    fetch('https://istaisprojekts-main-lixsd6.laravel.cloud/api/friends/count', {
                         headers: {'Authorization': `Bearer ${token}`},
                     }),
-                    fetch('http://127.0.0.1:8000/api/capsules/count', {
+                    fetch('https://istaisprojekts-main-lixsd6.laravel.cloud/api/capsules/count', {
                         headers: {'Authorization': `Bearer ${token}`},
                     })
                 ]);
@@ -131,7 +131,7 @@ const Profile = () => {
                     return;
                 }
 
-                const response = await fetch('http://127.0.0.1:8000/api/capsules', {
+                const response = await fetch('https://istaisprojekts-main-lixsd6.laravel.cloud/api/capsules', {
                     headers: {
                         'Authorization': `Bearer ${token}`,
                         'Accept': 'application/json',
@@ -216,7 +216,7 @@ const Profile = () => {
     const handlePrivacyChange = async (privacy) => {
         const token = localStorage.getItem('access_token');
         try {
-            const response = await fetch('http://127.0.0.1:8000/api/user/privacy', {
+            const response = await fetch('https://istaisprojekts-main-lixsd6.laravel.cloud/api/user/privacy', {
                 method: 'PUT',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -277,7 +277,7 @@ const Profile = () => {
         setIsRemoving(true);
 
         try {
-            const response = await fetch(`http://127.0.0.1:8000/api/friends/${friendId}`, {
+            const response = await fetch(`https://istaisprojekts-main-lixsd6.laravel.cloud/api/friends/${friendId}`, {
                 method: 'DELETE',
                 headers: {
                     'Authorization': `Bearer ${token}`,

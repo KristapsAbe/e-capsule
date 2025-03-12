@@ -120,7 +120,7 @@ function Modal({ show, onClose, onSave, initialData }) {
   const fetchUserProfile = async () => {
     try {
       const token = localStorage.getItem('access_token');
-      const response = await fetch('http://127.0.0.1:8000/api/get-profile', {
+      const response = await fetch('https://istaisprojekts-main-lixsd6.laravel.cloud/api/get-profile', {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -146,7 +146,7 @@ function Modal({ show, onClose, onSave, initialData }) {
       setInitialFormData(initialData);
 
       if (data.user.profileImage) {
-        setImagePreview(`http://127.0.0.1:8000/storage/${data.user.profileImage}`);
+        setImagePreview(`https://istaisprojekts-main-lixsd6.laravel.cloud/storage/${data.user.profileImage}`);
       }
     } catch (error) {
       console.error('Failed to fetch user profile:', error);
@@ -223,7 +223,7 @@ function Modal({ show, onClose, onSave, initialData }) {
 
     try {
       const token = localStorage.getItem('access_token');
-      const response = await fetch('http://127.0.0.1:8000/api/update-profile', {
+      const response = await fetch('https://istaisprojekts-main-lixsd6.laravel.cloud/api/update-profile', {
         method: 'POST',
         body: formDataToSend,
         headers: {

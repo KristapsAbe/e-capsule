@@ -7,7 +7,7 @@ const CapsuleAcceptModal = ({ isOpen, onClose, capsule, onAcceptComplete }) => {
   const [imageComments, setImageComments] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
-  const API_BASE_URL = 'http://127.0.0.1:8000';
+  const API_BASE_URL = 'https://istaisprojekts-main-lixsd6.laravel.cloud';
 
   useEffect(() => {
     if (!isOpen) {

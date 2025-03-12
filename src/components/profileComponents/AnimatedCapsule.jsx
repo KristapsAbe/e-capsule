@@ -40,7 +40,7 @@ const AnimatedCapsule = ({ capsuleData }) => {
         description: capsuleData.description,
         privacy: capsuleData.privacy || 'private',
         images: parsedImages.map((img, index) => ({
-          src: img.includes('http') ? img : `http://127.0.0.1:8000/storage/${img}`,
+          src: img.includes('http') ? img : `https://istaisprojekts-main-lixsd6.laravel.cloud/storage/${img}`,
           caption: `Memory ${index + 1}`,
           date: new Date(capsuleData.created_at || Date.now()).toLocaleDateString(),
         })),
