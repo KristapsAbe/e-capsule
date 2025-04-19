@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
-
 const CustomCalendar = ({ selectedDate, onDateChange }) => {
   const [currentDate, setCurrentDate] = useState(selectedDate || new Date());
 
@@ -51,7 +50,7 @@ const CustomCalendar = ({ selectedDate, onDateChange }) => {
             {day}
           </div>
         ))}
-        
+
         {[...emptyDays, ...days].map((day, index) => (
           <button
             key={index}
@@ -71,13 +70,6 @@ const CustomCalendar = ({ selectedDate, onDateChange }) => {
           </button>
         ))}
       </div>
-
-      {/* <div className="mt-4 text-center">
-        <div className="flex items-center justify-center space-x-2 p-2 text-[#A3688F]">
-          <Clock size={20} />
-          <span className="font-bold">{formatTime(selectedDate)}</span>
-        </div>
-      </div> */}
     </div>
   );
 };

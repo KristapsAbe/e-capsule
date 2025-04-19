@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { X, Bell, Clock, UserPlus, Timer, MessageSquare } from 'lucide-react';
+import { useLanguage } from "../LanguageContext";
 
 const NotificationSidebar = ({ isOpen, onClose, onUpdateCount, fetchFriendRequestCount, onCapsuleAccept }) => {
+  const { t } = useLanguage();
   const [friendRequests, setFriendRequests] = useState([]);
   const [sharedCapsules, setSharedCapsules] = useState([]);
   const [activeTab, setActiveTab] = useState('friends');
@@ -16,7 +18,7 @@ const NotificationSidebar = ({ isOpen, onClose, onUpdateCount, fetchFriendReques
         return;
       }
 
-      const response = await fetch('https://istaisprojekts-main-lixsd6.laravel.cloud/api/friends/requests', {
+      const response = await fetch('http://127.0.0.1:8000/api/friends/requests', {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Accept': 'application/json',
@@ -44,7 +46,7 @@ const NotificationSidebar = ({ isOpen, onClose, onUpdateCount, fetchFriendReques
         return;
       }
 
-      const response = await fetch('https://istaisprojekts-main-lixsd6.laravel.cloud/api/capsules/shared', {
+      const response = await fetch('http://127.0.0.1:8000/api/capsules/shared', {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Accept': 'application/json',
@@ -78,7 +80,7 @@ const NotificationSidebar = ({ isOpen, onClose, onUpdateCount, fetchFriendReques
       const token = localStorage.getItem('access_token');
       if (!token) return;
 
-      const response = await fetch(`https://istaisprojekts-main-lixsd6.laravel.cloud/api/friends/request/${requestId}/${action}`, {
+      const response = await fetch(`http://127.0.0.1:8000/api/friends/request/${requestId}/${action}`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -113,7 +115,7 @@ const NotificationSidebar = ({ isOpen, onClose, onUpdateCount, fetchFriendReques
       if (status === 'accepted') {
         const capsuleData = {
           share_id: share.share_id,
-          capsule_id: share.capsule_id, // Match this with modal's expected structure
+          capsule_id: share.capsule_id,
           title: share.title,
           vision: share.vision || '',
           shared_by: share.shared_by,
@@ -128,7 +130,7 @@ const NotificationSidebar = ({ isOpen, onClose, onUpdateCount, fetchFriendReques
         return;
       }
 
-      const response = await fetch(`https://istaisprojekts-main-lixsd6.laravel.cloud/api/capsules/share/${shareId}/status`, {
+      const response = await fetch(`http://127.0.0.1:8000/api/capsules/share/${shareId}/status`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -159,15 +161,15 @@ const NotificationSidebar = ({ isOpen, onClose, onUpdateCount, fetchFriendReques
 
   return (
       <motion.div
-          initial="closed"
           animate={isOpen ? 'open' : 'closed'}
-          variants={sidebarVariants}
           className="fixed top-0 right-0 h-full w-80 bg-background shadow-lg z-40 overflow-hidden"
+          initial="closed"
+          variants={sidebarVariants}
       >
         <div className="flex flex-col h-full font-lexend">
           <div className="flex justify-between items-center p-4 border-b border-gray-200">
-            <h2 className="font-bold text-xl text-text">Notifications</h2>
-            <button onClick={onClose} className="text-text hover:text-accent transition-colors">
+            <h2 className="font-bold text-xl text-text">{t('notifications')}</h2>
+            <button className="text-text hover:text-accent transition-colors" onClick={onClose}>
               <X size={24} />
             </button>
           </div>
@@ -177,13 +179,13 @@ const NotificationSidebar = ({ isOpen, onClose, onUpdateCount, fetchFriendReques
                 className={`flex-1 py-2 px-4 ${activeTab === 'friends' ? 'border-b-2 border-blue-500 text-text' : ''}`}
                 onClick={() => setActiveTab('friends')}
             >
-              Friend Requests
+              {t('friendRequests')}
             </button>
             <button
                 className={`flex-1 py-2 px-4 ${activeTab === 'capsules' ? 'border-b-2 border-blue-500 text-text' : ''}`}
                 onClick={() => setActiveTab('capsules')}
             >
-              Shared Capsules
+              {t('sharedCapsules')}
             </button>
           </div>
 
@@ -193,33 +195,33 @@ const NotificationSidebar = ({ isOpen, onClose, onUpdateCount, fetchFriendReques
                     friendRequests.map((request) => (
                         <motion.div
                             key={request.id}
-                            initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.3 }}
                             className="p-4 border-b border-gray-100 hover:bg-gray-50 transition-colors"
+                            initial={{ opacity: 0, y: 20 }}
+                            transition={{ duration: 0.3 }}
                         >
                           <div className="flex items-start">
                             <div className="flex-shrink-0 mr-3">
-                              <UserPlus size={18} className="text-blue-500" />
+                              <UserPlus className="text-blue-500" size={18} />
                             </div>
                             <div className="flex-grow">
-                              <p className="text-sm text-text">{request.user.name} sent you a friend request</p>
+                              <p className="text-sm text-text">{request.user.name} {t('sentYouFriendRequest')}</p>
                               <p className="text-xs text-gray-500 mt-1 flex items-center">
-                                <Clock size={12} className="mr-1" />
+                                <Clock className="mr-1" size={12} />
                                 {new Date(request.created_at).toLocaleString()}
                               </p>
                               <div className="mt-2 flex space-x-2">
                                 <button
-                                    onClick={() => handleFriendRequest(request.id, 'accept')}
                                     className="px-3 py-1 bg-green-500 text-white rounded-md text-xs hover:bg-green-600 transition-colors"
+                                    onClick={() => handleFriendRequest(request.id, 'accept')}
                                 >
-                                  Accept
+                                  {t('accept')}
                                 </button>
                                 <button
-                                    onClick={() => handleFriendRequest(request.id, 'decline')}
                                     className="px-3 py-1 bg-red-500 text-white rounded-md text-xs hover:bg-red-600 transition-colors"
+                                    onClick={() => handleFriendRequest(request.id, 'decline')}
                                 >
-                                  Decline
+                                  {t('decline')}
                                 </button>
                               </div>
                             </div>
@@ -227,9 +229,9 @@ const NotificationSidebar = ({ isOpen, onClose, onUpdateCount, fetchFriendReques
                         </motion.div>
                     ))
                 ) : (
-                    <div className="flex flex-col items-center justify-center h-full text-gray-500">
+                    <div className="flex flex-col items-center justify-center h-full text-gray-500 text-center">
                       <UserPlus size={48} />
-                      <p className="mt-4 text-lg font-medium">No friend requests</p>
+                      <p className="mt-4 text-lg font-medium">{t('noFriendRequests')}</p>
                     </div>
                 )
             ) : (
@@ -244,55 +246,55 @@ const NotificationSidebar = ({ isOpen, onClose, onUpdateCount, fetchFriendReques
                       sharedCapsules.map((share) => (
                           <motion.div
                               key={share.share_id}
-                              initial={{ opacity: 0, y: 20 }}
                               animate={{ opacity: 1, y: 0 }}
-                              transition={{ duration: 0.3 }}
                               className="p-4 border-b border-gray-100 hover:bg-gray-50 transition-colors"
+                              initial={{ opacity: 0, y: 20 }}
+                              transition={{ duration: 0.3 }}
                           >
                             <div className="flex items-start">
                               <div className="flex-shrink-0 mr-3">
-                                <Timer size={18} className="text-purple-500" />
+                                <Timer className="text-purple-500" size={18} />
                               </div>
                               <div className="flex-grow">
                                 <p className="text-sm text-text">
-                                  {share.shared_by} shared a capsule with you
+                                  {share.shared_by} {t('sharedCapsuleWithYou')}
                                 </p>
                                 <p className="text-sm font-medium text-gray-900 mt-1">
                                   {share.title}
                                 </p>
                                 {share.vision && (
-                                    <p className="text-xs text-gray-600 mt-1">
-                                      Vision: {share.vision}
+                                    <p className="text-xs text-gray-600 mt-1 truncate">
+                                      {t('vision')}: {share.vision}
                                     </p>
                                 )}
                                 <p className="text-xs text-gray-500 mt-1 flex items-center">
-                                  <Clock size={12} className="mr-1" />
+                                  <Clock className="mr-1" size={12} />
                                   {new Date(share.created_at).toLocaleString()}
                                 </p>
 
                                 {share.status === 'pending' && (
                                     <div className="mt-2 flex space-x-2">
                                       <button
+                                          className="px-3 py-1 bg-green-500 text-white rounded-md text-xs hover:bg-green-600 transition-colors"
                                           onClick={() => {
                                             console.log('Accept button clicked for share:', share);
                                             handleShareResponse(share.share_id, 'accepted');
                                           }}
-                                          className="px-3 py-1 bg-green-500 text-white rounded-md text-xs hover:bg-green-600 transition-colors"
                                       >
-                                        Accept
+                                        {t('accept')}
                                       </button>
                                       <button
-                                          onClick={() => handleShareResponse(share.share_id, 'declined')}
                                           className="px-3 py-1 bg-red-500 text-white rounded-md text-xs hover:bg-red-600 transition-colors"
+                                          onClick={() => handleShareResponse(share.share_id, 'declined')}
                                       >
-                                        Decline
+                                        {t('decline')}
                                       </button>
                                     </div>
                                 )}
 
                                 {share.status !== 'pending' && (
                                     <p className="text-xs mt-2 capitalize text-gray-500">
-                                      Status: {share.status}
+                                      {t('status')}: {share.status}
                                     </p>
                                 )}
                               </div>
@@ -302,7 +304,7 @@ const NotificationSidebar = ({ isOpen, onClose, onUpdateCount, fetchFriendReques
                   ) : (
                       <div className="flex flex-col items-center justify-center h-full text-gray-500">
                         <MessageSquare size={48} />
-                        <p className="mt-4 text-lg font-medium">No shared capsules</p>
+                        <p className="mt-4 text-lg font-medium">{t('noSharedCapsules')}</p>
                       </div>
                   )}
                 </>

@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faGoogle, faFacebookF, faInstagram, faDiscord } from '@fortawesome/free-brands-svg-icons';
 import { faExclamationCircle, faCheckCircle } from '@fortawesome/free-solid-svg-icons';
 
 function Register() {
@@ -29,7 +28,7 @@ function Register() {
         setSuccess('');
 
         try {
-            const response = await fetch('https://istaisprojekts-main-lixsd6.laravel.cloud/api/register', {
+            const response = await fetch('http://127.0.0.1:8000/api/register', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -65,7 +64,7 @@ function Register() {
         setSuccess('');
 
         try {
-            const response = await fetch('https://istaisprojekts-main-lixsd6.laravel.cloud/api/verify-email', {
+            const response = await fetch('http://127.0.0.1:8000/api/verify-email', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -89,8 +88,8 @@ function Register() {
 
             setSuccess('Registration successful!');
 
-            localStorage.setItem('access_token', data.access_token);  
-            localStorage.setItem('user', JSON.stringify(data.user));  
+            localStorage.setItem('access_token', data.access_token);
+            localStorage.setItem('user', JSON.stringify(data.user));
 
             navigate('/profile');
         } catch (err) {
@@ -116,7 +115,7 @@ function Register() {
                     <div className="flex flex-col items-center space-y-1 w-full px-4 md:px-8 pt-8 md:pt-40">
                         <h1 className="text-2xl md:text-4xl font-extralight font-lexend tracking-wider text-text">NEVERFORGET.</h1>
                         <p className="text-lg md:text-xl text-[#FFD4F1] tracking-wide font-lexend font-bold">E-CAPSULE</p>
-                        
+
                         {!showVerification ? (
                             <form onSubmit={handleSubmit} className="flex flex-col pt-6 md:pt-10 space-y-4 md:space-y-6 w-full max-w-md items-center justify-center text-text">
                                 <input
@@ -135,8 +134,8 @@ function Register() {
                                     className="p-3 md:p-4 w-full shadow-secondary rounded-[100px] font-light font-lexend bg-background text-center text-text text-base md:text-lg border-2 border-[#A3688F] outline-none placeholder-white placeholder-opacity-30"
                                 />
                                 {validationErrors.name && <p className="text-red-500 text-xs mt-1">{validationErrors.name[0]}</p>}
-                                
-                              
+
+
                                 <input
                                     type="password"
                                     placeholder="PASSWORD"
@@ -173,23 +172,13 @@ function Register() {
                                 <p className="text-sm">{error}</p>
                             </div>
                         )}
-                        
+
                         {success && (
                             <div className="flex items-center bg-green-100 text-green-700 p-3 rounded-lg w-full mb-4">
                                 <FontAwesomeIcon icon={faCheckCircle} className="mr-2 text-xl" />
                                 <p className="text-sm">{success}</p>
                             </div>
                         )}
-
-                        <div className="w-full pt-4">
-                            <p className="text-text text-center mb-4 font-lexend text-sm md:text-base">Or register with</p>
-                            <div className="flex justify-center space-x-6">
-                                <FontAwesomeIcon icon={faGoogle} className="text-xl md:text-2xl text-text hover:text-[#A3688F] transition-all duration-300 cursor-pointer" />
-                                <FontAwesomeIcon icon={faFacebookF} className="text-xl md:text-2xl text-text hover:text-[#A3688F] transition-all duration-300 cursor-pointer" />
-                                <FontAwesomeIcon icon={faInstagram} className="text-xl md:text-2xl text-text hover:text-[#A3688F] transition-all duration-300 cursor-pointer" />
-                                <FontAwesomeIcon icon={faDiscord} className="text-xl md:text-2xl text-text hover:text-[#A3688F] transition-all duration-300 cursor-pointer" />
-                            </div>
-                        </div>
 
                         <div className="w-full pt-6 text-center">
                             <p className="text-text font-lexend text-sm md:text-base">

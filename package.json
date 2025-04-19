@@ -11,6 +11,8 @@
     "@fortawesome/react-fontawesome": "^0.2.2",
     "@mui/icons-material": "^6.1.4",
     "@mui/material": "^6.1.4",
+    "@stripe/react-stripe-js": "^3.4.0",
+    "@stripe/stripe-js": "^6.1.0",
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
@@ -29,7 +31,7 @@
     "react-router-dom": "^6.26.2",
     "react-scripts": "5.0.1",
     "react-slick": "^0.30.2",
-    "recharts": "^2.12.7",
+    "recharts": "^2.15.2",
     "slick-carousel": "^1.8.1",
     "swiper": "^11.1.14",
     "web-vitals": "^2.1.4"
@@ -60,6 +62,11 @@
   },
   "devDependencies": {
     "autoprefixer": "^10.4.20",
+    "eslint": "^8.57.1",
+    "eslint-plugin-import": "^2.31.0",
+    "eslint-plugin-jsx-a11y": "^6.10.2",
+    "eslint-plugin-react": "^7.37.4",
+    "eslint-plugin-react-hooks": "^5.2.0",
     "postcss": "^8.4.45",
     "tailwindcss": "^3.4.10"
   }

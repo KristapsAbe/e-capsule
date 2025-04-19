@@ -1,16 +1,17 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
-import DashBoard from './pages/DashBoard';
+import DashBoard from './components/DashBoard/DashBoard';
 import Header from './components/Header';
 import Login from './pages/Login';
 import Register from './pages/Register';
-import Profile from './pages/Profile';
-import CapsuleCreation from './pages/CapsuleCreation';
-import Friends from './pages/FindFriends';
+import Profile from './components/Profile/Profile';
+import CapsuleCreation from './components/CapsuleCreation/CapsuleCreation';
+import Friends from './components/FriendsDiscovery/FindFriends';
 import NotificationSidebar from './components/NotificationSidebar';
 import CapsuleAcceptModal from './components/CapsuleAcceptModal';
-import Home from './pages/Home';
+import Home from './components/Home/Home';
 import { Toaster } from 'react-hot-toast';
+import { LanguageProvider} from "./LanguageContext";
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 
@@ -45,7 +46,7 @@ function App() {
   const fetchFriendRequestCount = useCallback(async () => {
     try {
       const token = localStorage.getItem('access_token');
-      const response = await fetch('https://istaisprojekts-main-lixsd6.laravel.cloud/api/friends/requests', {
+      const response = await fetch('http://127.0.0.1:8000/api/friends/requests', {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Accept': 'application/json',
@@ -141,7 +142,9 @@ function App() {
 export default function AppWrapper() {
   return (
       <Router>
-        <App />
+        <LanguageProvider>
+          <App />
+        </LanguageProvider>
       </Router>
   );
 }

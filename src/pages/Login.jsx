@@ -36,7 +36,7 @@ function Login() {
 
     const initializeFriendRequestCount = async (token) => {
         try {
-            const response = await fetch('https://istaisprojekts-main-lixsd6.laravel.cloud/api/friends/requests/count', {
+            const response = await fetch('http://127.0.0.1:8000/api/friends/requests/count', {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Accept': 'application/json',
@@ -76,7 +76,7 @@ function Login() {
         }
 
         try {
-            const response = await fetch('https://istaisprojekts-main-lixsd6.laravel.cloud/api/login', {
+            const response = await fetch('http://127.0.0.1:8000/api/login', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -145,25 +145,28 @@ function Login() {
                     <div className="flex flex-col items-center space-y-1 w-full px-4 md:px-8 pt-8 md:pt-40">
                         <h1 className="text-2xl md:text-4xl font-extralight font-lexend tracking-wider text-text">NEVERFORGET.</h1>
                         <p className="text-lg md:text-xl text-[#FFD4F1] tracking-wide font-lexend font-bold">E-CAPSULE</p>
-                        <form onSubmit={handleLogin} className="flex flex-col pt-6 md:pt-10 space-y-4 md:space-y-6 w-full max-w-md items-center justify-center text-text">
+                        <form onSubmit={handleLogin}
+                              className="flex flex-col pt-6 md:pt-10 space-y-4 md:space-y-6 w-full max-w-md items-center justify-center text-text">
                             {errors.general && (
-                                <div className="w-full bg-red-900 border-l-4 border-red-500 text-red-100 p-4 rounded-r-lg shadow-md mb-4">
+                                <div
+                                    className="w-full bg-red-900 border-l-4 border-red-500 text-red-100 p-4 rounded-r-lg shadow-md mb-4">
                                     <div className="flex items-center">
-                                        <FontAwesomeIcon icon={faExclamationCircle} className="text-red-300 mr-2" />
+                                        <FontAwesomeIcon icon={faExclamationCircle} className="text-red-300 mr-2"/>
                                         <p className="font-bold">{errors.general}</p>
                                     </div>
                                 </div>
                             )}
-                            
+
                             {success && (
-                                <div className="w-full bg-green-900 border-l-4 border-green-500 text-green-100 p-4 rounded-r-lg shadow-md mb-4">
+                                <div
+                                    className="w-full bg-green-900 border-l-4 border-green-500 text-green-100 p-4 rounded-r-lg shadow-md mb-4">
                                     <div className="flex items-center">
-                                        <FontAwesomeIcon icon={faCheckCircle} className="text-green-300 mr-2" />
+                                        <FontAwesomeIcon icon={faCheckCircle} className="text-green-300 mr-2"/>
                                         <p className="font-bold">{success}</p>
                                     </div>
                                 </div>
                             )}
-                            
+
                             <div className="w-full relative">
                                 <input
                                     type="email"
@@ -174,8 +177,9 @@ function Login() {
                                     className={getInputClassName('email')}
                                 />
                                 {touched.email && errors.email && (
-                                    <div className="absolute -bottom-6 left-0 w-full text-center text-red-500 font-lexend text-sm">
-                                        <FontAwesomeIcon icon={faInfoCircle} className="mr-1" />
+                                    <div
+                                        className="absolute -bottom-6 left-0 w-full text-center text-red-500 font-lexend text-sm">
+                                        <FontAwesomeIcon icon={faInfoCircle} className="mr-1"/>
                                         {errors.email}
                                     </div>
                                 )}
@@ -191,28 +195,29 @@ function Login() {
                                     className={getInputClassName('password')}
                                 />
                                 {touched.password && errors.password && (
-                                    <div className="absolute -bottom-6 left-0 w-full text-center text-red-500 text-sm font-lexend">
-                                        <FontAwesomeIcon icon={faInfoCircle} className="mr-1" />
+                                    <div
+                                        className="absolute -bottom-6 left-0 w-full text-center text-red-500 text-sm font-lexend">
+                                        <FontAwesomeIcon icon={faInfoCircle} className="mr-1"/>
                                         {errors.password}
                                     </div>
                                 )}
                             </div>
-                            <button 
-                                type="submit" 
+                            <button
+                                type="submit"
                                 className="font-lexend text-text font-extralight text-sm tracking-widest relative group mt-8">
                                 LOGIN
-                                <span className="absolute left-0 right-0 bottom-[-5px] h-[2px] w-0 bg-[#A3688F] transition-all duration-300 group-hover:w-full"></span>
+                                <span
+                                    className="absolute left-0 right-0 bottom-[-5px] h-[2px] w-0 bg-[#A3688F] transition-all duration-300 group-hover:w-full"></span>
                             </button>
                         </form>
-                        
-                        <div className="w-full pt-4">
-                            <p className="text-text text-center mb-4 font-lexend text-sm md:text-base">Or login with</p>
-                            <div className="flex justify-center space-x-6">
-                                <FontAwesomeIcon icon={faGoogle} className="text-xl md:text-2xl cursor-pointer text-text" />
-                                <FontAwesomeIcon icon={faFacebookF} className="text-xl md:text-2xl cursor-pointer text-text" />
-                                <FontAwesomeIcon icon={faInstagram} className="text-xl md:text-2xl cursor-pointer text-text" />
-                                <FontAwesomeIcon icon={faDiscord} className="text-xl md:text-2xl cursor-pointer text-text" />
-                            </div>
+
+                        <div className="w-full pt-6 text-center">
+                            <p className="text-text font-lexend text-sm md:text-base">
+                                New user?{' '}
+                                <a href="/register" className="text-[#A3688F] hover:underline">
+                                    Register
+                                </a>
+                            </p>
                         </div>
                     </div>
                 </div>

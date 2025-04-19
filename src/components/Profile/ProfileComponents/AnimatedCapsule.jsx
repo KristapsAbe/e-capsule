@@ -3,7 +3,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Clock, Lock, Sparkles, Play, Pause, RefreshCw, AlertTriangle } from 'lucide-react';
 
 const AnimatedCapsule = ({ capsuleData }) => {
-  // Component state
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [processedCapsuleData, setProcessedCapsuleData] = useState(null);
@@ -15,7 +14,6 @@ const AnimatedCapsule = ({ capsuleData }) => {
   const [transition, setTransition] = useState('zoom');
   const [progress, setProgress] = useState(0);
 
-  // Process capsule data from props
   useEffect(() => {
     if (!capsuleData) {
       setError('No capsule data provided');
@@ -25,7 +23,6 @@ const AnimatedCapsule = ({ capsuleData }) => {
     try {
       setLoading(true);
 
-      // Parse images if they're in string format
       let parsedImages;
       if (typeof capsuleData.images === 'string') {
         parsedImages = JSON.parse(capsuleData.images);
@@ -33,14 +30,13 @@ const AnimatedCapsule = ({ capsuleData }) => {
         parsedImages = capsuleData.images;
       }
 
-      // Transform the capsule data to match what the component expects
       const transformedData = {
         id: capsuleData.id,
         title: capsuleData.title,
         description: capsuleData.description,
         privacy: capsuleData.privacy || 'private',
         images: parsedImages.map((img, index) => ({
-          src: img.includes('http') ? img : `https://istaisprojekts-main-lixsd6.laravel.cloud/storage/${img}`,
+          src: img.includes('http') ? img : `http://127.0.0.1:8000/storage/${img}`,
           caption: `Memory ${index + 1}`,
           date: new Date(capsuleData.created_at || Date.now()).toLocaleDateString(),
         })),
@@ -62,7 +58,6 @@ const AnimatedCapsule = ({ capsuleData }) => {
 
       setProcessedCapsuleData(transformedData);
 
-      // Auto-unlock if the capsule is already available
       if (transformedData.time.is_available) {
         setStage(0);
       }
@@ -74,7 +69,6 @@ const AnimatedCapsule = ({ capsuleData }) => {
     }
   }, [capsuleData]);
 
-  // Handle image slideshow
   useEffect(() => {
     let progressTimer;
     if (isPlaying && showContent && processedCapsuleData?.images?.length > 0) {
@@ -96,17 +90,16 @@ const AnimatedCapsule = ({ capsuleData }) => {
     return () => clearInterval(progressTimer);
   }, [isPlaying, activeIndex, showContent, processedCapsuleData?.images?.length]);
 
-  // Particle effects for animation
   const particles = [...Array(40)].map((_, i) => ({
     color: [
-      '#A7ACCD', // primary
-      '#5E3762', // secondary
-      '#B2779F', // accent
-      '#FF95DD', // button
-      '#E5E6F0', // text
-      '#FFB6C1', // light pink
-      '#9370DB', // medium purple
-      '#FF69B4', // hot pink
+      '#A7ACCD',
+      '#5E3762',
+      '#B2779F',
+      '#FF95DD',
+      '#E5E6F0',
+      '#FFB6C1',
+      '#9370DB',
+      '#FF69B4',
     ][Math.floor(Math.random() * 8)],
     size: Math.random() * 8 + 4,
     spread: Math.random() * 360,
@@ -115,7 +108,6 @@ const AnimatedCapsule = ({ capsuleData }) => {
   }));
 
   const handleUnlock = () => {
-    // Only allow unlocking if the capsule is available or in demo mode
     if (processedCapsuleData?.time?.is_available && stage < 3) {
       setStage((prev) => prev + 1);
       if (stage === 2) {
@@ -125,7 +117,6 @@ const AnimatedCapsule = ({ capsuleData }) => {
         }, 3000);
       }
     } else if (!processedCapsuleData?.time?.is_available) {
-      // Show a pulsing effect but don't unlock
       setStage(1);
       setTimeout(() => setStage(0), 500);
     }
@@ -164,7 +155,6 @@ const AnimatedCapsule = ({ capsuleData }) => {
     }
   };
 
-  // Loading state
   if (loading) {
     return (
         <div className="w-full h-full min-h-[600px] flex items-center justify-center bg-gradient-to-b from-background to-secondary">
@@ -176,7 +166,6 @@ const AnimatedCapsule = ({ capsuleData }) => {
     );
   }
 
-  // Error state
   if (error) {
     return (
         <div className="w-full h-full min-h-[600px] flex items-center justify-center bg-gradient-to-b from-background to-secondary">
@@ -201,14 +190,11 @@ const AnimatedCapsule = ({ capsuleData }) => {
 
   return (
       <div className="w-full max-w-8xl mx-auto p-4">
-        {/* Centered Container */}
         <div className="flex justify-center items-center">
-          {/* Animated Capsule */}
           <div className="h-[850px] bg-secondary rounded-lg overflow-hidden shadow-lg w-full">
             <div className="w-full h-full min-h-[600px] bg-gradient-to-b from-background to-secondary relative overflow-hidden">
               {!showContent ? (
                   <div className="relative w-full h-full flex flex-col items-center justify-center">
-                    {/* Background effects */}
                     <div className="absolute inset-0">
                       {[...Array(30)].map((_, i) => (
                           <motion.div
@@ -239,7 +225,6 @@ const AnimatedCapsule = ({ capsuleData }) => {
                       ))}
                     </div>
 
-                    {/* Explosion particles */}
                     {isUnlocking && (
                         <div className="absolute inset-0 pointer-events-none">
                           {particles.map((particle, i) => (
@@ -268,7 +253,6 @@ const AnimatedCapsule = ({ capsuleData }) => {
                         </div>
                     )}
 
-                    {/* Main capsule container */}
                     <motion.div
                         className="relative"
                         animate={
@@ -295,7 +279,6 @@ const AnimatedCapsule = ({ capsuleData }) => {
                               }
                         }
                     >
-                      {/* Progress indicator */}
                       <div className="absolute -top-20 left-1/2 transform -translate-x-1/2">
                         <div className="flex gap-2">
                           {[0, 1, 2].map((i) => (
@@ -319,7 +302,6 @@ const AnimatedCapsule = ({ capsuleData }) => {
                         </div>
                       </div>
 
-                      {/* Capsule body */}
                       <motion.div
                           className="w-80 h-[28rem] rounded-3xl relative cursor-pointer overflow-hidden"
                           style={{
@@ -330,7 +312,6 @@ const AnimatedCapsule = ({ capsuleData }) => {
                           whileHover={{ scale: isLocked ? 1 : 1.02 }}
                           onClick={handleUnlock}
                       >
-                        {/* Glowing effects */}
                         <motion.div
                             className="absolute inset-0"
                             animate={{
@@ -345,7 +326,6 @@ const AnimatedCapsule = ({ capsuleData }) => {
                             transition={{ duration: 2, repeat: Infinity }}
                         />
 
-                        {/* Capsule details */}
                         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex flex-col items-center gap-4">
                           <motion.div
                               animate={
@@ -389,7 +369,6 @@ const AnimatedCapsule = ({ capsuleData }) => {
                           </motion.div>
                         </div>
 
-                        {/* Decorative elements */}
                         <motion.div
                             className="absolute top-8 left-1/2 -translate-x-1/2 w-40 h-1 rounded"
                             style={{ background: isUnlocking ? '#FF95DD' : '#A7ACCD' }}
@@ -419,7 +398,6 @@ const AnimatedCapsule = ({ capsuleData }) => {
 
                         <Clock className="absolute bottom-16 left-1/2 transform -translate-x-1/2 w-6 h-6 text-text" />
 
-                        {/* Title at the bottom */}
                         <div className="absolute bottom-2 left-0 right-0 text-center px-4">
                           <p className="text-text text-sm font-medium truncate">{processedCapsuleData?.title}</p>
                         </div>
@@ -428,7 +406,6 @@ const AnimatedCapsule = ({ capsuleData }) => {
                   </div>
               ) : (
                   <div className="relative w-full h-full">
-                    {/* Memory Player */}
                     <div className="absolute inset-0 bg-black">
                       <AnimatePresence mode="wait">
                         {validImages.length > 0 && (
@@ -444,7 +421,6 @@ const AnimatedCapsule = ({ capsuleData }) => {
                                   className="w-full h-full object-cover scale-110"
                               />
 
-                              {/* Caption */}
                               <motion.div
                                   className="absolute bottom-20 left-0 right-0 p-8 text-center"
                                   initial={{ y: 50, opacity: 0 }}
@@ -458,7 +434,6 @@ const AnimatedCapsule = ({ capsuleData }) => {
                         )}
                       </AnimatePresence>
 
-                      {/* Progress indicators */}
                       {validImages.length > 0 && (
                           <div className="absolute top-6 left-4 right-4 flex gap-2 z-10">
                             {validImages.map((_, index) => (
@@ -483,7 +458,6 @@ const AnimatedCapsule = ({ capsuleData }) => {
                           </div>
                       )}
 
-                      {/* Controls */}
                       {validImages.length > 0 && (
                           <div className="absolute bottom-0 left-0 right-0 p-4 flex justify-center items-center gap-4 bg-gradient-to-t from-black/80 to-transparent">
                             <motion.button

@@ -2,20 +2,31 @@ import React, {useState, useEffect} from 'react';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {faCheckCircle, faTrash, faComment, faExclamationCircle} from '@fortawesome/free-solid-svg-icons';
 import 'react-datepicker/dist/react-datepicker.css';
-import CapsuleDesignSelector from '../components/profileComponents/CapsuleDesignSelector';
-import CapsulePreview from '../components/capsuleCreationComponents/CapsulePreview';
-import CapsuleSharing from '../components/capsuleCreationComponents/CapsuleSharing';
+import CapsuleDesignSelector from '../Profile/ProfileComponents/CapsuleDesignSelector';
+import CapsulePreview from './CapsuleCreationComponents/CapsulePreview';
+import CapsuleSharing from './CapsuleCreationComponents/CapsuleSharing';
 import {useNavigate} from 'react-router-dom';
-import CustomCalendar from '../components/capsuleCreationComponents/CustomCalendar'
+import CustomCalendar from './CapsuleCreationComponents/CustomCalendar'
+import { useLanguage } from "../../LanguageContext";
 import {
     validateStep,
     validateFile,
     ALLOWED_FILE_TYPES,
-} from "../components/validations/CapsuleCreationValidation";
+} from "../validations/CapsuleCreationValidation";
 
 function CapsuleCreation() {
-    const steps = ['TITLE AND DESCRIPTION', 'IMAGES', 'TIME AND DATE', 'IMAGE ADDONS', 'VISION', 'PRIVACY', 'CAPSULE DESIGN', 'PREVIEW', 'SHARING'];
-    const [currentStep, setCurrentStep] = useState(0);
+    const { t } = useLanguage();
+    const steps = [
+        t('titleAndDescription'),
+        t('images'),
+        t('timeAndDate'),
+        t('imageAddons'),
+        t('vision'),
+        t('privacy'),
+        t('capsuleDesign'),
+        t('preview'),
+        t('sharing')
+    ];    const [currentStep, setCurrentStep] = useState(0);
     const [stepErrors, setStepErrors] = useState({});
     const navigate = useNavigate();
     const [formData, setFormData] = useState({
@@ -144,15 +155,8 @@ function CapsuleCreation() {
         capsuleData.append('design', formData.design);
 
         try {
-            console.log('Sending capsule data:', {
-                imageCount: formData.images.length,
-                title: formData.title,
-                timeIso: formData.time.toISOString(),
-                privacy: formData.privacy,
-                sharedWithCount: formData.sharedWith.length
-            });
 
-            const response = await fetch('https://istaisprojekts-main-lixsd6.laravel.cloud/api/capsule/create', {
+            const response = await fetch('http://127.0.0.1:8000/api/capsule/create', {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -162,17 +166,9 @@ function CapsuleCreation() {
 
             if (!response.ok) {
                 const errorData = await response.json().catch(e => ({message: 'Could not parse error response'}));
-                console.error('Server returned error:', {
-                    status: response.status,
-                    statusText: response.statusText,
-                    errorData
-                });
-                throw new Error(`HTTP error! status: ${response.status}`);
             }
             navigate('/profile');
         } catch (error) {
-            console.error('Error creating capsule:', error);
-            console.error('Error details:', error.message);
             setStepErrors({submit: 'Failed to create capsule. Please try again.'});
         }
     };
@@ -235,7 +231,7 @@ function CapsuleCreation() {
                 <div className='mb-16'>
                     {currentStep === 0 && (<>
                         <p className='text-text font-regular text-lg sm:text-xl lg:text-2xl mt-2 sm:mt-4 pb-2 sm:pb-4'>
-                            TITLE
+                            {t('title') || 'TITLE'}
                         </p>
                         <input
                             name="title"
@@ -246,7 +242,7 @@ function CapsuleCreation() {
                         {renderError(stepErrors.title)}
 
                         <p className='text-text font-regular text-lg sm:text-xl lg:text-2xl pb-2 sm:pb-4'>
-                            DESCRIPTION
+                            {t('description') || 'DESCRIPTION'}
                         </p>
                         <textarea
                             name="description"
@@ -259,13 +255,13 @@ function CapsuleCreation() {
 
                     {currentStep === 1 && (<>
                         <p className='text-text font-regular text-lg sm:text-xl lg:text-2xl mt-4 sm:mt-8 pb-2 sm:pb-4 uppercase'>
-                            Upload Images
+                            {t('uploadImages') || 'Upload Images'}
                         </p>
                         <label
                             htmlFor="images"
                             className={`w-full max-w-xs mx-auto flex justify-center items-center p-1.5 sm:p-2 shadow-secondary rounded-[100px] font-light font-lexend bg-background text-center text-text text-sm sm:text-base lg:text-xl border-2 cursor-pointer hover:bg-[#A3688F] hover:text-white transition duration-300 ${stepErrors.images ? 'border-red-500' : 'border-[#A3688F]'}`}
                         >
-                            Choose Images
+                            {t('chooseImages') || 'Choose Images'}
                         </label>
                         <input
                             id="images"
@@ -300,7 +296,7 @@ function CapsuleCreation() {
 
                     {currentStep === 2 && (<>
                         <p className='text-text font-regular text-lg sm:text-xl mt-2 sm:mt-4 mb-2 sm:mb-4'>
-                            Set Time and Date for Capsule Opening
+                            {t('setTimeDate') || 'Set Time and Date for Capsule Opening'}
                         </p>
                         <div className="flex flex-col items-center">
                             <CustomCalendar
@@ -341,8 +337,9 @@ function CapsuleCreation() {
                             <div
                                 className="bg-background rounded-lg p-3 sm:p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
                                 <div className="flex justify-between items-center mb-2 sm:mb-4">
-                                    <h3 className="text-lg sm:text-xl font-bold text-text">Add Comment to
-                                        Image</h3>
+                                    <h3 className="text-lg sm:text-xl font-bold text-text">
+                                        {t('addCommentToImage') || 'Add Comment to Image'}
+                                    </h3>
                                     <button
                                         onClick={() => {
                                             setSelectedImage(null);
@@ -366,13 +363,13 @@ function CapsuleCreation() {
                                     </div>
 
                                     <div className="w-full sm:w-1/2 flex flex-col">
-                                                    <textarea
-                                                        value={imageComment}
-                                                        onChange={(e) => setImageComment(e.target.value)}
-                                                        className="flex-grow p-2 sm:p-3 border rounded-lg border-[#A3688F] focus:outline-none focus:ring-2 focus:ring-[#A3688F] bg-background text-text resize-none mb-2 sm:mb-4 text-sm sm:text-base"
-                                                        placeholder="Add your comment here..."
-                                                        rows={6}
-                                                    />
+                                        <textarea
+                                            value={imageComment}
+                                            onChange={(e) => setImageComment(e.target.value)}
+                                            className="flex-grow p-2 sm:p-3 border rounded-lg border-[#A3688F] focus:outline-none focus:ring-2 focus:ring-[#A3688F] bg-background text-text resize-none mb-2 sm:mb-4 text-sm sm:text-base"
+                                            placeholder={t('addCommentHere') || "Add your comment here..."}
+                                            rows={6}
+                                        />
 
                                         <div className="flex justify-end gap-2">
                                             <button
@@ -382,13 +379,13 @@ function CapsuleCreation() {
                                                 }}
                                                 className="px-3 sm:px-4 py-1.5 sm:py-2 rounded-full border border-[#A3688F] text-text hover:bg-[#A3688F] hover:text-white transition duration-300 text-sm sm:text-base"
                                             >
-                                                Cancel
+                                                {t('cancel') || 'Cancel'}
                                             </button>
                                             <button
                                                 onClick={saveImageComment}
                                                 className="px-3 sm:px-4 py-1.5 sm:py-2 bg-[#A3688F] text-white rounded-full hover:bg-[#8A4B6A] transition duration-300 text-sm sm:text-base"
                                             >
-                                                Save Comment
+                                                {t('saveComment') || 'Save Comment'}
                                             </button>
                                         </div>
                                     </div>
@@ -399,13 +396,13 @@ function CapsuleCreation() {
 
                     {currentStep === 4 && (<>
                         <p className='text-text font-regular text-lg sm:text-xl lg:text-2xl pb-2 sm:pb-4'>
-                            VISION
+                            {t('vision') || 'VISION'}
                         </p>
                         <textarea
                             name="vision"
                             value={formData.vision}
                             onChange={handleInputChange}
-                            placeholder="Share your thoughts, expectations, or considerations for this time capsule..."
+                            placeholder={t('shareThoughts') || "Share your thoughts, expectations, or considerations for this time capsule..."}
                             className={`mb-4 w-full max-w-md p-1.5 sm:p-2 resize-none h-24 sm:h-32 lg:h-[240px] shadow-secondary rounded-[10px] font-light font-lexend bg-background text-left text-text text-sm sm:text-base lg:text-lg border-2 focus:outline-none focus:ring-2 ${stepErrors.vision ? 'border-red-500' : 'border-[#A3688F]'}`}
                         ></textarea>
                         {renderError(stepErrors.vision)}
@@ -413,7 +410,7 @@ function CapsuleCreation() {
 
                     {currentStep === 5 && (<>
                         <p className='text-text font-regular text-lg sm:text-xl lg:text-2xl pb-2 sm:pb-4'>
-                            PRIVACY SETTINGS
+                            {t('privacySettings') || 'PRIVACY SETTINGS'}
                         </p>
                         <select
                             name="privacy"
@@ -421,9 +418,9 @@ function CapsuleCreation() {
                             onChange={handleInputChange}
                             className={`mb-4 w-full max-w-md p-1.5 sm:p-2 shadow-secondary rounded-[100px] font-light font-lexend bg-background text-center text-text text-sm sm:text-base lg:text-xl border-2 focus:outline-none focus:ring-2 ${stepErrors.privacy ? 'border-red-500' : 'border-[#A3688F]'}`}
                         >
-                            <option value="private">Private</option>
-                            <option value="friends">Friends Only</option>
-                            <option value="public">Public</option>
+                            <option value="private">{t('private') || 'Private'}</option>
+                            <option value="friends">{t('friendsOnly') || 'Friends Only'}</option>
+                            <option value="public">{t('public') || 'Public'}</option>
                         </select>
                         {renderError(stepErrors.privacy)}
                     </>)}
@@ -459,7 +456,7 @@ function CapsuleCreation() {
                         className="font-lexend text-text font-extralight text-base sm:text-lg tracking-widest relative group px-2 sm:px-4"
                         onClick={handlePrevStep}
                     >
-                        Previous
+                        {t('previous') || 'Previous'}
                         <span
                             className="absolute left-0 right-0 bottom-[-5px] h-[2px] w-0 bg-[#A3688F] transition-all group-hover:w-full"></span>
                     </button>)}
@@ -467,7 +464,7 @@ function CapsuleCreation() {
                         className="font-lexend text-text font-extralight text-base sm:text-lg tracking-widest relative group px-2 sm:px-4"
                         onClick={handleNextStep}
                     >
-                        Next
+                        {t('next') || 'Next'}
                         <span
                             className="absolute left-0 right-0 bottom-[-5px] h-[2px] w-0 bg-[#A3688F] transition-all group-hover:w-full"></span>
                     </button>)}
@@ -475,7 +472,7 @@ function CapsuleCreation() {
                         className="font-lexend text-white font-bold text-base sm:text-lg tracking-widest relative group bg-[#A3688F] px-4 sm:px-6 py-1.5 sm:py-2 rounded-full hover:bg-[#8A4B6A] transition duration-300"
                         onClick={createCapsule}
                     >
-                        Save Capsule
+                        {t('saveCapsule') || 'Save Capsule'}
                     </button>)}
                 </div>
             </div>

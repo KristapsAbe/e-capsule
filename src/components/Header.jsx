@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Menu, X, ChevronDown, Bell } from 'lucide-react';
-import { useLocation } from 'react-router-dom'; // Import useLocation
+import { useLocation } from 'react-router-dom';
+import { useLanguage} from "../LanguageContext";
 
-// Flag components remain unchanged
 const EngFlag = () => (
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 30" width="20" height="10">
       <clipPath id="s">
@@ -31,20 +31,20 @@ const LatFlag = () => (
 function Header({ notificationCount, onNotificationClick }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLangMenuOpen, setIsLangMenuOpen] = useState(false);
-  const [currentLang, setCurrentLang] = useState('ENG');
-  const location = useLocation(); // Get the current route
+  const location = useLocation();
+  const { currentLang, changeLang, t } = useLanguage(); // Use the language context
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
   const toggleLangMenu = () => setIsLangMenuOpen(!isLangMenuOpen);
 
-  const changeLang = (lang) => {
-    setCurrentLang(lang);
+  const handleChangeLang = (lang) => {
+    changeLang(lang);
     setIsLangMenuOpen(false);
   };
 
   const LangButton = ({ lang, flag: Flag }) => (
       <button
-          onClick={() => changeLang(lang)}
+          onClick={() => handleChangeLang(lang)}
           className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left flex items-center font-lexend"
       >
         <Flag />
@@ -52,14 +52,14 @@ function Header({ notificationCount, onNotificationClick }) {
       </button>
   );
 
-  const NavItem = ({ href, children }) => {
-    const isActive = location.pathname === href; // Check if the current route matches the href
+  const NavItem = ({ href, translationKey }) => {
+    const isActive = location.pathname === href;
     return (
         <a
             href={href}
             className="text-text relative group text-l font-light font-lexend"
         >
-          {children}
+          {t(translationKey)}
           <span
               className={`absolute bottom-0 left-0 w-full h-0.5 bg-accent transform ${
                   isActive ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'
@@ -86,7 +86,6 @@ function Header({ notificationCount, onNotificationClick }) {
               </h1>
             </div>
 
-            {/* Mobile Menu Button */}
             <div className="flex items-center space-x-2 md:hidden">
               <button onClick={onNotificationClick} className="p-1.5 relative font-lexend">
                 <Bell size={20} color="#FFFFFF" />
@@ -101,20 +100,17 @@ function Header({ notificationCount, onNotificationClick }) {
               </button>
             </div>
 
-            {/* Desktop Navigation */}
             <nav className="hidden md:flex items-center justify-center flex-grow px-4">
               <div className="flex flex-wrap justify-center space-x-2 md:space-x-4 lg:space-x-6 text-sm md:text-base font-lexend">
-                <NavItem href="/Home">Home</NavItem>
-                <NavItem href="/Dashboard">Dashboard</NavItem>
-                <NavItem href="/Profile">Profile</NavItem>
-                <NavItem href="/CapsuleCreation">Create Capsule</NavItem>
-                <NavItem href="/Friends">Discover</NavItem>
+                <NavItem href="/Home" translationKey="home" />
+                <NavItem href="/Dashboard" translationKey="dashboard" />
+                <NavItem href="/Profile" translationKey="profile" />
+                <NavItem href="/CapsuleCreation" translationKey="createCapsule" />
+                <NavItem href="/Friends" translationKey="discover" />
               </div>
             </nav>
 
-            {/* Desktop Actions */}
             <div className="hidden md:flex items-center space-x-2 lg:space-x-3 flex-shrink-0 font-lexend">
-              {/* Language Selector */}
               <div className="relative">
                 <button
                     onClick={toggleLangMenu}
@@ -134,15 +130,13 @@ function Header({ notificationCount, onNotificationClick }) {
                 )}
               </div>
 
-              {/* Logout Button */}
               <button
                   onClick={handleLogout}
                   className="text-text bg-secondary rounded-xl py-1.5 px-4 sm:px-8 font-bold text-xs md:text-sm whitespace-nowrap font-lexend"
               >
-                LOGOUT
+                {t('logout')}
               </button>
 
-              {/* Notification Button */}
               <button
                   onClick={onNotificationClick}
                   className="text-text rounded-xl py-1.5 px-3 font-bold text-xs md:text-sm flex items-center relative font-lexend"
@@ -157,15 +151,14 @@ function Header({ notificationCount, onNotificationClick }) {
             </div>
           </div>
 
-          {/* Mobile Menu */}
           {isMenuOpen && (
               <nav className="mt-4 md:hidden">
                 <div className="flex flex-col space-y-4 font-light font-lexend">
-                  <NavItem href="/Home">Home</NavItem>
-                  <NavItem href="/Dashboard">Dashboard</NavItem>
-                  <NavItem href="/Profile">Profile</NavItem>
-                  <NavItem href="/CapsuleCreation">Create Capsule</NavItem>
-                  <NavItem href="/Friends">Discover</NavItem>
+                  <NavItem href="/Home" translationKey="home" />
+                  <NavItem href="/Dashboard" translationKey="dashboard" />
+                  <NavItem href="/Profile" translationKey="profile" />
+                  <NavItem href="/CapsuleCreation" translationKey="createCapsule" />
+                  <NavItem href="/Friends" translationKey="discover" />
 
                   <div className="pt-4 flex flex-col space-y-3">
                     <button
@@ -180,7 +173,7 @@ function Header({ notificationCount, onNotificationClick }) {
                         onClick={handleLogout}
                         className="text-text bg-secondary w-full rounded-xl py-2 font-lexend"
                     >
-                      LOGOUT
+                      {t('logout')}
                     </button>
                   </div>
                 </div>

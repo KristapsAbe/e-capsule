@@ -3,51 +3,29 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import CommentModal from './FriendsDiscoveryPopups/CommentModal';
+import CommentCapsuleView from './FriendsDiscoveryPopups/CommentCapsuleView';
+import ImageWithFallback from "./FriendsComponents/ImageWithFallback";
+import UserCard from './FriendsComponents/UserCard';
+import SearchInput from './FriendsComponents/SearchInput';
+import Pagination from './FriendsComponents/Pagination';
+import { useLanguage} from "../../LanguageContext";
 import {
-  faSearch,
-  faUserPlus,
   faTimes,
-  faCheck,
-  faUserFriends,
-  faClock,
-  faUsers,
   faLock,
   faGlobe,
   faUserGroup,
-  faChevronLeft,
-  faChevronRight,
   faCapsules
 } from '@fortawesome/free-solid-svg-icons';
-import { Lock, Unlock, Star, BookOpen, Clock, Shield, Heart, Quote, MessageCircle, Camera, Package } from 'lucide-react';
-
-const ImageWithFallback = memo(({ src, alt, onLoad, onError, className }) => {
-  const [imgSrc, setImgSrc] = useState(src);
-
-  const handleError = () => {
-    setImgSrc('/images/DefaultAvatar.jpg');
-    onError?.();
-  };
-
-  return (
-    <img
-      src={imgSrc}
-      alt={alt}
-      className={className}
-      onError={handleError}
-      onLoad={onLoad}
-      loading="lazy"
-      decoding="async"
-      width="128"
-      height="128"
-    />
-  );
-});
+import { Lock, Unlock, Star, BookOpen, Clock, Shield, Heart, Quote, MessageCircle, Camera, Package, MessageSquare, MessageSquarePlus } from 'lucide-react';
 
 const UserModal = memo(({ user, onClose, onSendRequest, isPending }) => {
+  const { t } = useLanguage();
   const [userCapsules, setUserCapsules] = useState([]);
   const [capsuleLoading, setCapsuleLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isFriend, setIsFriend] = useState(false);
+  const [selectedCapsule, setSelectedCapsule] = useState(null);
 
   useEffect(() => {
     const fetchCapsules = async () => {
@@ -60,7 +38,7 @@ const UserModal = memo(({ user, onClose, onSendRequest, isPending }) => {
           throw new Error('No access token found');
         }
 
-        const url = `https://istaisprojekts-main-lixsd6.laravel.cloud/api/friends/${user.id}/capsules`;
+        const url = `http://127.0.0.1:8000/api/friends/${user.id}/capsules`;
         console.log('Fetching capsules from:', url);
 
         const response = await axios.get(url, {
@@ -119,6 +97,10 @@ const UserModal = memo(({ user, onClose, onSendRequest, isPending }) => {
       fetchCapsules();
     }
   }, [user]);
+
+  const handleCloseComment = () => {
+    setSelectedCapsule(null);
+  };
 
   const getDesignStyles = (design) => {
     const styles = {
@@ -208,16 +190,51 @@ const UserModal = memo(({ user, onClose, onSendRequest, isPending }) => {
     );
   };
 
-  const CapsuleCard = ({ capsule }) => {
+  const CapsuleCard = ({ capsule, setSelectedCapsule }) => {
     const design = capsule.design || 'heritage';
     const styles = getDesignStyles(design);
     const isReady = capsule.daysLeft <= 0;
     const images = JSON.parse(capsule.images || '[]');
     const hasImages = images.length > 0;
+    const [commentMode, setCommentMode] = useState('add');
+    const [isCommentViewOpen, setIsCommentViewOpen] = useState(false);
+    const [localSelectedCapsule, setLocalSelectedCapsule] = useState(null);
+
+    console.log('Parsed images:', images);
+
+    const imageBaseUrl = '/';
+
+    const handleCapsuleClick = (e) => {
+      e.stopPropagation();
+      if (isReady) {
+      }
+    };
+
+    const handleAddComment = (e) => {
+      e.stopPropagation();
+        setCommentMode('add');
+        setLocalSelectedCapsule(capsule);
+    };
+
+    const handleCloseComment = () => {
+      setLocalSelectedCapsule(null);
+    };
+
+    const handleViewComments = (e) => {
+      e.stopPropagation();
+        setIsCommentViewOpen(true);
+    };
+
+    const handleCloseCommentView = () => {
+      setIsCommentViewOpen(false);
+    };
 
     return (
-        <div className={`relative rounded-lg border overflow-hidden mb-3 ${styles.contentBg}`}>
-          <ThemeDecoration design={design} />
+        <div
+            className={`relative rounded-lg border overflow-hidden mb-3 ${styles.contentBg} ${isReady ? 'cursor-pointer' : ''}`}
+            onClick={isReady ? handleCapsuleClick : undefined}
+        >
+          <ThemeDecoration design={design}/>
 
           <div className="flex justify-between items-center p-3">
             <div className="flex items-center space-x-2">
@@ -230,56 +247,79 @@ const UserModal = memo(({ user, onClose, onSendRequest, isPending }) => {
                   className="text-text/50"
                   title={`Privacy: ${capsule.privacy}`}
               />
-              {isReady ? (
+
                   <div className="flex items-center text-xs px-2 py-1 rounded-full bg-white/10 backdrop-blur-sm">
-                    <Unlock size={12} style={{ color: styles.accent }} className="mr-1" />
-                    <span style={{ color: styles.accent }}>Ready</span>
+                    <Unlock size={12} style={{color: styles.accent}} className="mr-1"/>
+                    <span style={{color: styles.accent}}>{t('ready')}</span>
                   </div>
-              ) : (
-                  <div className="flex items-center text-xs px-2 py-1 rounded-full bg-black/30">
-                    <Lock size={12} style={{ color: styles.accent }} className="mr-1" />
-                    <span>{`${capsule.daysLeft}d`}</span>
-                  </div>
-              )}
             </div>
           </div>
 
           <div className="p-2 flex items-center">
             <div className="w-16 h-16 rounded overflow-hidden mr-3 relative bg-black/40">
-              {hasImages ? (
-                  <>
-                    <img
-                        src="/api/placeholder/64/64"
-                        alt="Memory preview"
-                        className={`w-full h-full object-cover blur-sm ${styles.filter}`}
-                    />
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <Camera size={16} style={{ color: styles.accent }} />
-                    </div>
-                  </>
+              {hasImages && images.length > 0 ? (
+                  <img
+                      src={`${imageBaseUrl}${images[0]}`}
+                      alt="Memory preview"
+                      className={`w-full h-full object-cover blur-sm ${styles.filter}`}
+                      onError={(e) => {
+                        console.error('Image failed to load:', `${imageBaseUrl}${images[0]}`);
+                        e.target.onerror = null;
+                      }}
+                  />
               ) : (
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <Package size={16} style={{ color: styles.accent }} />
+                    <Package size={16} style={{color: styles.accent}}/>
                   </div>
               )}
             </div>
 
             <div className="flex-1 min-w-0">
               <p className="text-text/60 text-xs line-clamp-2">
-                {capsule.description || "This memory is sealed until it's time to open it."}
+                {capsule.description || t('thisMemoryIsSealed')}
               </p>
-              <div className="mt-1 flex items-center text-text/50 text-xs">
-                <Clock size={10} className="mr-1" />
-                <span>
+              <div className="mt-1 flex items-center justify-between">
+                <div className="flex items-center text-text/50 text-xs">
+                  <Clock size={10} className="mr-1"/>
+                  <span>
                 {new Date(capsule.created_at).toLocaleDateString(undefined, {
                   year: 'numeric',
                   month: 'short',
                   day: 'numeric'
                 })}
               </span>
+                </div>
+                    <div className="flex items-center space-x-2">
+                      <button
+                          onClick={handleAddComment}
+                          className="p-1 rounded-full hover:bg-white/10 transition-colors"
+                          title={t('addComment')}
+                      >
+                        <MessageSquarePlus size={14} style={{color: styles.accent}}/>
+                      </button>
+                      <button
+                          onClick={handleViewComments}
+                          className="p-1 rounded-full hover:bg-white/10 transition-colors"
+                          title={t('viewComments')}
+                      >
+                        <MessageSquare size={14} style={{color: styles.accent}}/>
+                      </button>
+                    </div>
               </div>
             </div>
           </div>
+
+          <CommentModal
+              isOpen={localSelectedCapsule !== null}
+              onClose={handleCloseComment}
+              capsule={localSelectedCapsule}
+          />
+
+          <CommentCapsuleView
+              isOpen={isCommentViewOpen}
+              onClose={handleCloseCommentView}
+              capsule={capsule}
+          />
         </div>
     );
   };
@@ -313,27 +353,6 @@ const UserModal = memo(({ user, onClose, onSendRequest, isPending }) => {
                     <h2 className="text-white font-lexend font-bold text-2xl">
                       {user.name}
                     </h2>
-
-                    {!isFriend && (
-                        <div className="text-white/70 mt-2 text-sm">
-                          {isPending ? (
-                              <p className="flex items-center">
-                                <FontAwesomeIcon icon={faUserGroup} className="opacity-70 mr-2" />
-                                Friend request pending
-                              </p>
-                          ) : (
-                              <div className="flex items-center">
-                                <span>Not friends yet</span>
-                                <button
-                                    onClick={onSendRequest}
-                                    className="ml-2 px-3 py-1 bg-[#FF95DD] text-white rounded-lg text-xs hover:bg-[#FF95DD]/90 transition"
-                                >
-                                  Add Friend
-                                </button>
-                              </div>
-                          )}
-                        </div>
-                    )}
                   </div>
                 </div>
                 <button
@@ -348,12 +367,12 @@ const UserModal = memo(({ user, onClose, onSendRequest, isPending }) => {
 
           <div className="p-6 max-h-96 overflow-y-auto">
             <div className="flex items-center mb-4">
-              <FontAwesomeIcon icon={faCapsules} className="text-[#FF95DD] mr-2" />
+              <FontAwesomeIcon icon={faCapsules} className="text-[#FF95DD] mr-2"/>
               <h3 className="text-lg font-medium text-text/90">
-                Memories {userCapsules.length > 0 ? `(${userCapsules.length})` : ''}
+                {t('memories')} {userCapsules.length > 0 ? `(${userCapsules.length})` : ''}
               </h3>
               {!isFriend && userCapsules.length > 0 &&
-                  <span className="ml-2 text-xs text-text/50">(showing public only)</span>
+                  <span className="ml-2 text-xs text-text/50">{t('showingPublicOnly')}</span>
               }
             </div>
 
@@ -370,15 +389,15 @@ const UserModal = memo(({ user, onClose, onSendRequest, isPending }) => {
             ) : userCapsules.length > 0 ? (
                 <div className="space-y-1">
                   {userCapsules.map((capsule) => (
-                      <CapsuleCard key={capsule.id} capsule={capsule} />
+                      <CapsuleCard key={capsule.id} capsule={capsule}/>
                   ))}
                 </div>
             ) : (
                 <div className="text-center py-8 text-text/70">
-                  <Package size={32} className="mx-auto mb-4 text-[#FF95DD] opacity-50" />
+                  <Package size={32} className="mx-auto mb-4 text-[#FF95DD] opacity-50"/>
                   {isFriend ?
-                      'No memories created yet' :
-                      'No public memories available'
+                      t('noMemoriesCreatedYet') :
+                      t('noPublicMemoriesAvailable')
                   }
                 </div>
             )}
@@ -388,123 +407,8 @@ const UserModal = memo(({ user, onClose, onSendRequest, isPending }) => {
   );
 });
 
-
-const UserCard = memo(({
-  user,
-  onSelect,
-  onSendRequest,
-  isPending
-}) => {
-  const handleClick = useCallback(() => {
-    onSelect(user);
-  }, [user, onSelect]);
-
-  const handleSendRequest = useCallback((e) => {
-    e.stopPropagation();
-    if (!isPending && !user.friend_request_sent && !user.is_friend) {
-      onSendRequest(user.id);
-    }
-  }, [user, isPending, onSendRequest]);
-
-  return (
-    <div
-      className="bg-background/70 rounded-2xl p-4 sm:p-6 flex flex-col items-center shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer"
-      onClick={handleClick}
-    >
-      <div className="relative w-20 h-20 sm:w-32 sm:h-32 mb-4">
-        <ImageWithFallback
-          src={user.profile_image_url}
-          alt={user.name}
-          className="w-full h-full rounded-full object-cover border-4 border-[#FF95DD]"
-        />
-      </div>
-      <h2 className="text-text font-lexend font-bold text-lg sm:text-xl mb-2">{user.name}</h2>
-      <p className="text-text/70 font-lexend text-xs sm:text-sm mb-4 line-clamp-2">
-        {user.bio || 'No bio available'}
-      </p>
-      {user.is_friend ? (
-        <span className="text-[#FF95DD] font-medium flex items-center gap-2">
-          <FontAwesomeIcon icon={faUserFriends} />
-          Already Friends
-        </span>
-      ) : user.friend_request_sent ? (
-        <span className="text-[#FF95DD] font-medium flex items-center gap-2">
-          <FontAwesomeIcon icon={faCheck} />
-          Request Sent
-        </span>
-      ) : (
-        <button
-          className={`bg-gradient-to-r from-[#FF95DD] to-[#FF5CAA] text-background font-lexend font-medium py-2 px-4 sm:px-6 rounded-full flex items-center hover:opacity-90 transition-opacity ${
-            isPending ? 'opacity-50 cursor-not-allowed' : ''
-          }`}
-          onClick={handleSendRequest}
-          disabled={isPending}
-        >
-          {isPending ? (
-            <span>Sending...</span>
-          ) : (
-            <>
-              <FontAwesomeIcon icon={faUserPlus} className="mr-2" />
-              Connect
-            </>
-          )}
-        </button>
-      )}
-    </div>
-  );
-});
-
-const SearchInput = memo(({ value, onChange }) => (
-  <div className="relative w-full max-w-sm mb-6 sm:mb-12">
-    <input
-      type="text"
-      placeholder="Search users..."
-      className="w-full py-2 sm:py-3 px-4 sm:px-6 pr-10 rounded-full border-2 border-[#FF95DD] bg-background/50 text-text focus:outline-none focus:border-[#FF5CAA] transition-all duration-300"
-      value={value}
-      onChange={onChange}
-    />
-    <FontAwesomeIcon
-      icon={faSearch}
-      className="absolute right-4 top-1/2 transform -translate-y-1/2 text-[#FF95DD]"
-    />
-  </div>
-));
-
-const Pagination = memo(({ currentPage, totalPages, onPageChange }) => {
-  return (
-    <div className="flex items-center justify-center gap-4 mt-8">
-      <button
-        onClick={() => onPageChange(currentPage - 1)}
-        disabled={currentPage === 1}
-        className={`p-2 rounded-full ${
-          currentPage === 1 
-            ? 'text-text/30 cursor-not-allowed' 
-            : 'text-[#FF95DD] hover:bg-[#FF95DD]/10'
-        }`}
-      >
-        <FontAwesomeIcon icon={faChevronLeft} />
-      </button>
-
-      <span className="font-lexend text-text">
-        Page {currentPage} of {totalPages}
-      </span>
-
-      <button
-        onClick={() => onPageChange(currentPage + 1)}
-        disabled={currentPage === totalPages}
-        className={`p-2 rounded-full ${
-          currentPage === totalPages 
-            ? 'text-text/30 cursor-not-allowed' 
-            : 'text-[#FF95DD] hover:bg-[#FF95DD]/10'
-        }`}
-      >
-        <FontAwesomeIcon icon={faChevronRight} />
-      </button>
-    </div>
-  );
-});
-
 const FriendsPage = () => {
+  const { t } = useLanguage();
   const [allUsers, setAllUsers] = useState([]); // Store all users
   const [users, setUsers] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -530,7 +434,7 @@ const FriendsPage = () => {
 
       try {
         const response = await fetch(
-            `https://istaisprojekts-main-lixsd6.laravel.cloud/api/friends`,
+            `http://127.0.0.1:8000/api/friends`,
             {
               headers: {
                 'Authorization': `Bearer ${token}`,
@@ -624,7 +528,7 @@ const FriendsPage = () => {
     }
 
     try {
-      const response = await fetch('https://istaisprojekts-main-lixsd6.laravel.cloud/api/friends/request', {
+      const response = await fetch('http://127.0.0.1:8000/api/friends/request', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -638,7 +542,7 @@ const FriendsPage = () => {
 
       if (!response.ok) throw new Error('Failed to send friend request');
 
-      toast.success('Friend request sent');
+      toast.success(t('friendRequestSent'));
 
       setAllUsers(prev =>
           prev.map(user =>
@@ -657,7 +561,7 @@ const FriendsPage = () => {
       );
     } catch (error) {
       console.error('Error sending friend request:', error);
-      toast.error('Failed to send friend request');
+      toast.error(t('failedToSendRequest'));
     } finally {
       setPendingRequests(prev => {
         const newSet = new Set(prev);
@@ -686,7 +590,7 @@ const FriendsPage = () => {
   return (
       <div className="min-h-screen flex flex-col items-center bg-background px-4 sm:px-8 py-12">
         <h1 className="text-text font-lexend font-bold text-2xl sm:text-4xl mb-6 sm:mb-12">
-          Find Friends
+          {t('findFriends')}
         </h1>
 
         <SearchInput value={searchTerm} onChange={handleSearch} />
@@ -701,7 +605,7 @@ const FriendsPage = () => {
           ) : error ? (
               <div className="text-red-500">{error}</div>
           ) : totalUsers === 0 ? (
-              <div className="text-text/70">No users found</div>
+              <div className="text-text/70">{t('noUsersFound')}</div>
           ) : (
               <>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 w-full">

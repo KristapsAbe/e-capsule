@@ -1,14 +1,16 @@
 import React, {useState, useEffect, useRef} from 'react';
 import {Settings, MoreVertical, Edit2, History, Camera, X, UserMinus} from 'lucide-react';
 import {useNavigate} from 'react-router-dom';
-import Modal from '../components/profileComponents/Modal';
-import AnimatedCapsule from '../components/profileComponents/AnimatedCapsule';
-import TimerModal from '../components/profileComponents/TimerModal';
-import CapsuleDesignSelector from '../components/profileComponents/CapsuleDesignSelector';
-import ProfileCapsulesGrid from '../components/profileComponents/ProfileCapsuleGrid';
-
+import Modal from './ProfileComponents/Modal';
+import AnimatedCapsule from './ProfileComponents/AnimatedCapsule';
+import TimerModal from './ProfileComponents/TimerModal';
+import CapsuleDesignSelector from './ProfileComponents/CapsuleDesignSelector';
+import ProfileCapsulesGrid from './ProfileComponents/ProfileCapsuleGrid';
+import ReviewModal from "./ProfileComponents/ReviewModal";
+import {useLanguage} from '../../LanguageContext';
 
 const Profile = () => {
+    const {t} = useLanguage();
     const [user, setUser] = useState(null);
     const [friends, setFriends] = useState([]);
     const [errors, setErrors] = useState({});
@@ -23,33 +25,78 @@ const Profile = () => {
     const [capsules, setCapsules] = useState([]);
     const [showTimerModal, setShowTimerModal] = useState(false);
     const [selectedLockedCapsule, setSelectedLockedCapsule] = useState(null);
+
+    const [showReviewModal, setShowReviewModal] = useState(false);
+    const [reviewChecked, setReviewChecked] = useState(false);
+
     const {designs} = CapsuleDesignSelector({
-        value: '', onChange: () => {
-        }
+        value: '', onChange: () => {}
     });
     const [isRemoving, setIsRemoving] = useState(false);
     const navigate = useNavigate();
     const settingsRef = useRef(null);
+
     const handleEditProfile = () => setShowEditModal(true);
     const handleCloseModal = () => setShowEditModal(false);
     const handleViewAllFriends = () => setShowFriendsModal(true);
     const handleCloseFriendsModal = () => setShowFriendsModal(false);
 
+    const checkShowReviewModal = async () => {
+        if (reviewChecked) return; // Only check once per session
 
+        try {
+            const token = localStorage.getItem('access_token');
+            const response = await fetch('http://127.0.0.1:8000/api/reviews/should-show', {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Accept': 'application/json',
+                },
+            });
+
+            const data = await response.json();
+
+            if (data.shouldShow) {
+                setTimeout(() => {
+                    setShowReviewModal(true);
+                }, 2000);
+            }
+
+            setReviewChecked(true);
+        } catch (err) {
+        }
+    };
+
+    const handleReviewSubmit = async (reviewData) => {
+        try {
+            const token = localStorage.getItem('access_token');
+            await fetch('http://127.0.0.1:8000/api/reviews', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(reviewData),
+            });
+
+            setShowReviewModal(false);
+        } catch (err) {
+            setErrors(prev => ({...prev, review: t('failedToLoadActivity')}));
+        }
+    };
 
     useEffect(() => {
         const token = localStorage.getItem('access_token');
-        console.log('Access Token:', token);
 
         if (!token) {
-            setErrors(prev => ({...prev, auth: 'No access token found'}));
+            setErrors(prev => ({...prev, auth: t('authTokenNotFound')}));
             navigate('/login');
             return;
         }
 
         const fetchUserData = async () => {
             try {
-                const response = await fetch('https://istaisprojekts-main-lixsd6.laravel.cloud/api/user', {
+                const response = await fetch('http://127.0.0.1:8000/api/user', {
                     headers: {
                         'Authorization': `Bearer ${token}`,
                         'Accept': 'application/json',
@@ -57,23 +104,26 @@ const Profile = () => {
                 });
                 const data = await response.json();
                 setUser(data);
-                // Add this line to set the user_id in localStorage
                 localStorage.setItem('user_id', data.id.toString());
                 if (data.profile_image) {
-                    setImgSrc(`https://istaisprojekts-main-lixsd6.laravel.cloud/storage/${data.profile_image}`);
+                    setImgSrc(`http://127.0.0.1:8000/storage/${data.profile_image}`);
+                }
+
+                if (data) {
+                    checkShowReviewModal();
                 }
             } catch (err) {
-                setErrors(prev => ({...prev, user: 'Failed to fetch user data'}));
-                console.error('Fetch error:', err);
+                setErrors(prev => ({...prev, user: t('failedToLoadProfile')}));
             }
         };
 
         const getDesignById = (designId) => {
             return designs.find(d => d.id === designId) || designs[0];
         };
+
         const fetchAcceptedFriends = async () => {
             try {
-                const response = await fetch('https://istaisprojekts-main-lixsd6.laravel.cloud/api/friends/accepted', {
+                const response = await fetch('http://127.0.0.1:8000/api/friends/accepted', {
                     headers: {
                         'Authorization': `Bearer ${token}`,
                         'Accept': 'application/json',
@@ -84,23 +134,21 @@ const Profile = () => {
                     setFriends(data);
                     setFriendCount(data.length);
                 } else {
-                    console.error('Received non-array friends data:', data);
                     setFriends([]);
                     setFriendCount(0);
                 }
             } catch (err) {
-                setErrors(prev => ({...prev, friends: 'Error fetching friends'}));
-                console.error('Error fetching friends:', err);
+                setErrors(prev => ({...prev, friends: t('failedToFetchFriends')}));
             }
         };
 
         const fetchCounts = async () => {
             try {
                 const [friendsRes, capsulesRes] = await Promise.all([
-                    fetch('https://istaisprojekts-main-lixsd6.laravel.cloud/api/friends/count', {
+                    fetch('http://127.0.0.1:8000/api/friends/count', {
                         headers: {'Authorization': `Bearer ${token}`},
                     }),
-                    fetch('https://istaisprojekts-main-lixsd6.laravel.cloud/api/capsules/count', {
+                    fetch('http://127.0.0.1:8000/api/capsules/count', {
                         headers: {'Authorization': `Bearer ${token}`},
                     })
                 ]);
@@ -113,8 +161,7 @@ const Profile = () => {
                 setFriendCount(friendsData.count);
                 setCapsuleCount(capsulesData.count);
             } catch (err) {
-                setErrors(prev => ({...prev, counts: 'Error fetching counts'}));
-                console.error('Error fetching counts:', err);
+                setErrors(prev => ({...prev, counts: t('error')}));
             }
         };
 
@@ -123,15 +170,11 @@ const Profile = () => {
                 const token = localStorage.getItem('access_token');
                 const currentUserId = parseInt(localStorage.getItem('user_id'));
 
-                console.log('Debug - Token:', token ? 'Present' : 'Missing');
-                console.log('Debug - User ID:', currentUserId);
-
                 if (!token || isNaN(currentUserId)) {
-                    console.error('Invalid token or user ID');
                     return;
                 }
 
-                const response = await fetch('https://istaisprojekts-main-lixsd6.laravel.cloud/api/capsules', {
+                const response = await fetch('http://127.0.0.1:8000/api/capsules', {
                     headers: {
                         'Authorization': `Bearer ${token}`,
                         'Accept': 'application/json',
@@ -139,24 +182,14 @@ const Profile = () => {
                 });
 
                 if (!response.ok) {
-                    throw new Error('Failed to fetch capsules');
+                    throw new Error(t('failedToFetchCapsules'));
                 }
 
                 const data = await response.json();
 
-                console.log('Debug - Raw capsules data:', data.data);
-                console.log('Debug - Current user ID for comparison:', currentUserId);
-
                 const filteredCapsules = data.data.filter(capsule => {
-                    console.log('Debug - Processing capsule:', {
-                        id: capsule.id,
-                        is_owner: capsule.is_owner,
-                        user_id: capsule.user_id,
-                        matches_current_user: capsule.user_id === currentUserId
-                    });
 
                     if (capsule.is_owner) {
-                        console.log('Debug - Including capsule (is owner):', capsule.id);
                         return true;
                     }
 
@@ -164,14 +197,10 @@ const Profile = () => {
                         user => parseInt(user.user_id) === currentUserId
                     );
 
-                    console.log('Debug - User relation for capsule', capsule.id, ':', userRelation);
 
                     const shouldInclude = userRelation?.status === 'accepted';
-                    console.log('Debug - Including capsule (shared):', shouldInclude);
                     return shouldInclude;
                 });
-
-                console.log('Debug - Filtered capsules:', filteredCapsules);
 
                 const capsulesWithDaysLeft = filteredCapsules.map(capsule => {
                     const openingDate = new Date(capsule.time);
@@ -187,21 +216,26 @@ const Profile = () => {
 
                 setCapsules(capsulesWithDaysLeft);
             } catch (err) {
-                console.error('Error fetching capsules:', err);
-                setErrors(prev => ({...prev, capsules: 'Failed to fetch capsules'}));
+                setErrors(prev => ({...prev, capsules: t('failedToFetchCapsules')}));
             }
         };
 
+        const fetchAllData = async () => {
+            try {
+                await fetchUserData();
 
-        Promise.all([
-            fetchUserData(),
-            fetchAcceptedFriends(),
-            fetchCounts(),
-            fetchCapsules()
-        ]).catch(err => {
-            console.error('Error in fetch operations:', err);
-        });
-    }, [navigate]);
+                await Promise.all([
+                    fetchAcceptedFriends(),
+                    fetchCounts(),
+                    fetchCapsules()
+                ]);
+            } catch (err) {
+                console.error("Error fetching data:", err);
+            }
+        };
+
+        fetchAllData();
+    }, [navigate, t]);
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -216,7 +250,7 @@ const Profile = () => {
     const handlePrivacyChange = async (privacy) => {
         const token = localStorage.getItem('access_token');
         try {
-            const response = await fetch('https://istaisprojekts-main-lixsd6.laravel.cloud/api/user/privacy', {
+            const response = await fetch('http://127.0.0.1:8000/api/user/privacy', {
                 method: 'PUT',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -228,14 +262,13 @@ const Profile = () => {
             setUser(prev => ({...prev, privacy: data.privacy}));
             setShowSettings(false);
         } catch (err) {
-            console.error('Error updating privacy:', err);
         }
     };
 
     const handleSaveProfile = (updatedUser) => {
         setUser(prevUser => ({
             ...prevUser,
-            name: `${updatedUser.firstName} ${updatedUser.lastName}`.trim(),
+            name: `${user.name}`.trim(),
             email: updatedUser.email,
             bio: updatedUser.bio
         }));
@@ -246,22 +279,19 @@ const Profile = () => {
     };
 
     const handleCapsuleClick = (capsule) => {
-        console.log('Capsule clicked:', capsule);
 
         if (capsule.daysLeft > 0) {
             setSelectedLockedCapsule(capsule);
             setShowTimerModal(true);
         } else {
             try {
-                // You don't need to parse the images here - let the AnimatedCapsule handle it
                 setSelectedCapsule(capsule);
                 setShowCapsule(true);
-                // The modal will now render <AnimatedCapsule capsule={selectedCapsule} />
             } catch (error) {
-                console.error('Error handling capsule click:', error);
             }
         }
     };
+
     const handleCloseCapsule = () => {
         setSelectedCapsule(null);
         setShowCapsule(false);
@@ -277,7 +307,7 @@ const Profile = () => {
         setIsRemoving(true);
 
         try {
-            const response = await fetch(`https://istaisprojekts-main-lixsd6.laravel.cloud/api/friends/${friendId}`, {
+            const response = await fetch(`http://127.0.0.1:8000/api/friends/${friendId}`, {
                 method: 'DELETE',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -289,17 +319,16 @@ const Profile = () => {
             const data = await response.json();
 
             if (!response.ok) {
-                throw new Error(data.message || 'Failed to remove friend');
+                throw new Error(data.message || t('failedToFetchFriends'));
             }
 
             setFriends(prevFriends => prevFriends.filter(friend => friend.id !== friendId));
             setFriendCount(prevCount => prevCount - 1);
 
         } catch (err) {
-            console.error('Error removing friend:', err);
             setErrors(prev => ({
                 ...prev,
-                friendRemoval: err.message || 'Failed to remove friend'
+                friendRemoval: err.message || t('failedToFetchFriends')
             }));
         } finally {
             setIsRemoving(false);
@@ -309,7 +338,7 @@ const Profile = () => {
     if (!user) {
         return (
             <div className="min-h-screen flex items-center justify-center">
-                <div className="animate-pulse text-2xl text-gray-600">Loading...</div>
+                <div className="animate-pulse text-2xl text-gray-600">{t('loadingCapsules')}</div>
             </div>
         );
     }
@@ -324,7 +353,7 @@ const Profile = () => {
                             <div className="w-32 h-32 rounded-full overflow-hidden ring-4 ring-pink-300 shadow-lg">
                                 <img
                                     src={imgSrc}
-                                    alt="Profile"
+                                    alt={t('profile')}
                                     className="w-full h-full object-cover"
                                     onError={() => setImgSrc('/images/DefaultAvatar.jpg')}
                                 />
@@ -339,15 +368,14 @@ const Profile = () => {
                             <h1 className="text-2xl font-bold text-text">{user.name}</h1>
                             <div className="mt-2 space-x-6">
                                 <button className="hover:text-secondary transition-colors">
-                                    {capsuleCount} Capsules
+                                    {capsuleCount} {t('capsules')}
                                 </button>
                                 <button className="hover:text-secondary transition-colors">
-                                    {friendCount} Friends
+                                    {friendCount} {t('friends')}
                                 </button>
                             </div>
                             <p className="mt-2">
-                                Privacy: {user.privacy ? user.privacy.charAt(0).toUpperCase() + user.privacy.slice(1).replace('_', ' ') : 'Public'}
-                            </p>
+                                {t('privacy')}: {user.privacy ? t(user.privacy.toLowerCase()) : t('public')}                            </p>
                         </div>
 
                         <div className="flex flex-wrap gap-3 justify-center md:justify-end">
@@ -356,7 +384,7 @@ const Profile = () => {
                                 className="flex items-center gap-2 px-4 py-2 bg-pink-500 border-2 border-btnOutline rounded-xl hover:text-gray-400 transition-colors"
                             >
                                 <Edit2 size={18}/>
-                                Edit Profile
+                                {t('editYourProfile')}
                             </button>
                             <div className="relative" ref={settingsRef}>
                                 <button
@@ -368,7 +396,7 @@ const Profile = () => {
                                 {showSettings && (
                                     <div
                                         className="absolute right-0 mt-2 w-48 bg-background rounded-lg shadow-lg z-10 py-1">
-                                        {['Private', 'Public', 'Friends Only'].map((option) => (
+                                        {[t('private'), t('public'), t('friendsOnly')].map((option) => (
                                             <button
                                                 key={option}
                                                 onClick={() => handlePrivacyChange(option)}
@@ -385,13 +413,13 @@ const Profile = () => {
 
                     <div className="mt-8 border-t border-secondary pt-8">
                         <div className="flex justify-between items-center mb-4">
-                            <h2 className="text-xl font-semibold">Friends ({friends.length})</h2>
+                            <h2 className="text-xl font-semibold">{t('friends')} ({friends.length})</h2>
                             {friends.length > 0 && (
                                 <button
                                     onClick={handleViewAllFriends}
                                     className="text-pink-500 hover:text-pink-600 transition-colors"
                                 >
-                                    View All
+                                    {t('viewAllActivity')}
                                 </button>
                             )}
                         </div>
@@ -415,19 +443,24 @@ const Profile = () => {
                             </div>
                         ) : (
                             <div className="text-center py-8 text-gray-500">
-                                No friends added yet
+                                {t('noFriendsFound')}
                             </div>
                         )}
                     </div>
 
-
                     <div className="mt-8 border-t border-secondary pt-8">
-                        <h2 className="text-xl font-semibold mb-6">Time Capsules</h2>
+                        <h2 className="text-xl font-semibold mb-6">{t('memoryCapsuleTimeline')}</h2>
                         <ProfileCapsulesGrid
                             capsules={capsules}
                             onCapsuleClick={handleCapsuleClick}
                         />
                     </div>
+
+                    <ReviewModal
+                        isOpen={showReviewModal}
+                        onClose={() => setShowReviewModal(false)}
+                        onSubmit={handleReviewSubmit}
+                    />
 
                     <Modal
                         show={showEditModal}
@@ -470,13 +503,14 @@ const Profile = () => {
                             title={selectedLockedCapsule.title}
                         />
                     )}
+
                     {showFriendsModal && (
                         <div
                             className="fixed inset-0 z-50 flex items-center justify-center bg-background/95 backdrop-blur-sm">
                             <div
                                 className="bg-background rounded-2xl shadow-custom p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
                                 <div className="flex justify-between items-center mb-4">
-                                    <h2 className="text-2xl font-bold">All Friends</h2>
+                                    <h2 className="text-2xl font-bold">{t('friends')}</h2>
                                     <button
                                         onClick={handleCloseFriendsModal}
                                         className="p-2 rounded-full bg-secondary/30 hover:bg-secondary/50 transition-all border border-btnOutline"
@@ -504,7 +538,7 @@ const Profile = () => {
                                                 onClick={() => handleRemoveFriend(friend.id)}
                                                 disabled={isRemoving}
                                                 className="absolute -top-2 -right-2 p-1.5 rounded-full bg-red-500 text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600 disabled:bg-gray-400"
-                                                title="Remove Friend"
+                                                title={t('cancel')}
                                             >
                                                 <UserMinus size={16}/>
                                             </button>

@@ -1,49 +1,50 @@
-import React, { useState, useCallback, useRef, forwardRef, useEffect } from 'react';
+import React, { useState, useCallback, useRef, forwardRef, useEffect, useMemo } from 'react';
 import { Card } from './Card';
-import { validateProfileForm } from '../validations/ProfileValidations';
-import { 
-  User, 
-  Mail, 
-  PencilLine, 
-  X, 
-  Lock, 
-  Eye, 
-  EyeOff, 
-  Camera 
+import { validateProfileForm } from '../../validations/ProfileValidations';
+import {
+  User,
+  Mail,
+  PencilLine,
+  X,
+  Lock,
+  Eye,
+  EyeOff,
+  Camera
 } from 'lucide-react';
-import { useMemo } from 'react';
-
+import { useLanguage } from "../../../LanguageContext";
 
 const Input = forwardRef(({ icon: Icon, error, rightIcon, ...props }, ref) => (
-  <div className="relative w-full flex flex-col">
-    <div className="relative w-full">
-      <Icon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-accent pointer-events-none z-10" />
-      <input
-        ref={ref}
-        {...props}
-        className={`w-full bg-background text-text rounded-lg border-2 
+    <div className="relative w-full flex flex-col">
+      <div className="relative w-full">
+        <Icon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-accent pointer-events-none z-10" />
+        <input
+            ref={ref}
+            {...props}
+            className={`w-full bg-background text-text rounded-lg border-2 
                  px-10 py-2 focus:outline-none transition-all duration-300
                  placeholder:text-primary/50 ${
-                   error 
-                     ? 'border-red-500 focus:border-red-600' 
-                     : 'border-secondary/30 focus:border-accent'
-                 } ${rightIcon ? 'pr-12' : ''}`}
-      />
-      {rightIcon && (
-        <div className="absolute right-3 top-1/2 -translate-y-1/2">
-          {rightIcon}
-        </div>
+                error
+                    ? 'border-red-500 focus:border-red-600'
+                    : 'border-secondary/30 focus:border-accent'
+            } ${rightIcon ? 'pr-12' : ''}`}
+        />
+        {rightIcon && (
+            <div className="absolute right-3 top-1/2 -translate-y-1/2">
+              {rightIcon}
+            </div>
+        )}
+      </div>
+      {error && (
+          <div className="min-h-[20px] mt-1">
+            <p className="text-sm text-red-500">{error}</p>
+          </div>
       )}
     </div>
-    {error && (
-      <div className="min-h-[20px] mt-1">
-        <p className="text-sm text-red-500">{error}</p>
-      </div>
-    )}
-  </div>
 ));
+
 const PasswordInput = forwardRef(({ error, value, onChange, onBlur, name, placeholder }, ref) => {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+  const { t } = useLanguage();
 
   const togglePasswordVisibility = (e) => {
     e.preventDefault();
@@ -51,36 +52,38 @@ const PasswordInput = forwardRef(({ error, value, onChange, onBlur, name, placeh
   };
 
   const visibilityIcon = (
-    <button
-      type="button"
-      onClick={togglePasswordVisibility}
-      className="text-accent/70 hover:text-accent transition-colors"
-    >
-      {isPasswordVisible ? (
-        <EyeOff className="w-5 h-5" />
-      ) : (
-        <Eye className="w-5 h-5" />
-      )}
-    </button>
+      <button
+          type="button"
+          onClick={togglePasswordVisibility}
+          className="text-accent/70 hover:text-accent transition-colors"
+      >
+        {isPasswordVisible ? (
+            <EyeOff className="w-5 h-5" />
+        ) : (
+            <Eye className="w-5 h-5" />
+        )}
+      </button>
   );
 
   return (
-    <Input
-      ref={ref}
-      icon={Lock}
-      type={isPasswordVisible ? 'text' : 'password'}
-      name={name}
-      value={value}
-      onChange={onChange}
-      onBlur={onBlur}
-      placeholder={placeholder}
-      error={error}
-      rightIcon={visibilityIcon}
-    />
+      <Input
+          ref={ref}
+          icon={Lock}
+          type={isPasswordVisible ? 'text' : 'password'}
+          name={name}
+          value={value}
+          onChange={onChange}
+          onBlur={onBlur}
+          placeholder={placeholder}
+          error={error}
+          rightIcon={visibilityIcon}
+      />
   );
 });
 
 function Modal({ show, onClose, onSave, initialData }) {
+  const { t } = useLanguage();
+
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -120,7 +123,7 @@ function Modal({ show, onClose, onSave, initialData }) {
   const fetchUserProfile = async () => {
     try {
       const token = localStorage.getItem('access_token');
-      const response = await fetch('https://istaisprojekts-main-lixsd6.laravel.cloud/api/get-profile', {
+      const response = await fetch('http://127.0.0.1:8000/api/get-profile', {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -129,7 +132,7 @@ function Modal({ show, onClose, onSave, initialData }) {
       });
 
       if (!response.ok) {
-        throw new Error(`Error: ${response.statusText}`);
+        throw new Error(`${t('error')}: ${response.statusText}`);
       }
 
       const data = await response.json();
@@ -146,11 +149,11 @@ function Modal({ show, onClose, onSave, initialData }) {
       setInitialFormData(initialData);
 
       if (data.user.profileImage) {
-        setImagePreview(`https://istaisprojekts-main-lixsd6.laravel.cloud/storage/${data.user.profileImage}`);
+        setImagePreview(`http://127.0.0.1:8000/storage/${data.user.profileImage}`);
       }
     } catch (error) {
       console.error('Failed to fetch user profile:', error);
-      setErrors(prev => ({ ...prev, general: 'Failed to load user profile' }));
+      setErrors(prev => ({ ...prev, general: t('failedToLoadProfile') }));
     }
   };
 
@@ -165,9 +168,8 @@ function Modal({ show, onClose, onSave, initialData }) {
       setFormData(prev => ({ ...prev, image: file }));
       setImagePreview(URL.createObjectURL(file));
 
-      // Validate file size immediately
       if (file.size > 2 * 1024 * 1024) {
-        setValidationErrors(prev => ({ ...prev, image: 'Image size must not exceed 2MB' }));
+        setValidationErrors(prev => ({ ...prev, image: t('imageSizeExceeded') }));
       } else {
         setValidationErrors(prev => {
           const newErrors = { ...prev };
@@ -183,7 +185,7 @@ function Modal({ show, onClose, onSave, initialData }) {
         setValidationErrors(prev => ({ ...prev, [name]: errors[name] }));
       }
     }
-  }, [formData, touchedFields]);
+  }, [formData, touchedFields, t]);
 
   const handleBlur = useCallback((fieldName) => {
     setTouchedFields(prev => ({ ...prev, [fieldName]: true }));
@@ -204,13 +206,13 @@ function Modal({ show, onClose, onSave, initialData }) {
     setValidationErrors(errors);
 
     if (Object.keys(errors).length > 0) {
-      setErrors(prev => ({ ...prev, general: 'Please correct the errors before submitting' }));
+      setErrors(prev => ({ ...prev, general: t('correctErrorsBeforeSubmitting') }));
       return;
     }
 
     setErrors({});
     setIsConfirming(true);
-  }, [formData]);
+  }, [formData, t]);
 
   const handleConfirm = useCallback(async () => {
     const formDataToSend = new FormData();
@@ -223,7 +225,7 @@ function Modal({ show, onClose, onSave, initialData }) {
 
     try {
       const token = localStorage.getItem('access_token');
-      const response = await fetch('https://istaisprojekts-main-lixsd6.laravel.cloud/api/update-profile', {
+      const response = await fetch('http://127.0.0.1:8000/api/update-profile', {
         method: 'POST',
         body: formDataToSend,
         headers: {
@@ -240,11 +242,21 @@ function Modal({ show, onClose, onSave, initialData }) {
           setIsConfirming(false);
           return;
         }
-        throw new Error(data.error || data.message || `Error: ${response.statusText}`);
+        throw new Error(data.error || data.message || `${t('error')}: ${response.statusText}`);
       }
 
-      setSuccessMessage('Profile updated successfully!');
-      onSave(data.user);
+      const updatedUserData = {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        bio: formData.bio,
+        image: formData.image
+      };
+
+      setSuccessMessage(t('profileUpdatedSuccessfully'));
+
+      onSave(updatedUserData);
+
       setTimeout(() => {
         setSuccessMessage('');
         onClose();
@@ -253,7 +265,7 @@ function Modal({ show, onClose, onSave, initialData }) {
       setErrors(prev => ({ ...prev, general: error.message }));
       setIsConfirming(false);
     }
-  }, [formData, confirmPassword, onSave, onClose]);
+  }, [formData, confirmPassword, onSave, onClose, t]);
 
   if (!show) return null;
 
@@ -262,7 +274,7 @@ function Modal({ show, onClose, onSave, initialData }) {
         <Card className="w-full max-w-3xl bg-background p-6 rounded-2xl shadow-custom">
           <div className="relative mb-8">
             <h2 className="text-2xl font-semibold text-center text-text">
-              Edit Your Profile
+              {t('editYourProfile')}
             </h2>
             <button
                 onClick={onClose}
@@ -292,7 +304,7 @@ function Modal({ show, onClose, onSave, initialData }) {
                     name="confirmPassword"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    placeholder="Enter your current password to confirm changes"
+                    placeholder={t('enterCurrentPasswordToConfirm')}
                 />
                 <div className="flex justify-end space-x-4">
                   <button
@@ -301,14 +313,14 @@ function Modal({ show, onClose, onSave, initialData }) {
                       className="px-6 py-2 rounded-lg border-2 border-btnOutline text-primary
                          hover:bg-secondary/10 transition-all duration-300"
                   >
-                    Back
+                    {t('back')}
                   </button>
                   <button
                       type="submit"
                       className="px-6 py-2 rounded-lg bg-button
                          hover:bg-accent text-background transition-all duration-300"
                   >
-                    Confirm Changes
+                    {t('confirmChanges')}
                   </button>
                 </div>
               </form>
@@ -320,7 +332,7 @@ function Modal({ show, onClose, onSave, initialData }) {
                       {imagePreview ? (
                           <img
                               src={imagePreview}
-                              alt="Profile"
+                              alt={t('profile')}
                               className="w-full h-full object-cover"
                           />
                       ) : (
@@ -357,7 +369,7 @@ function Modal({ show, onClose, onSave, initialData }) {
                       value={formData.firstName}
                       onChange={handleChange}
                       onBlur={() => handleBlur('firstName')}
-                      placeholder="First Name"
+                      placeholder={t('firstName')}
                       error={touchedFields.firstName ? validationErrors.firstName : ''}
                   />
                   <Input
@@ -368,7 +380,7 @@ function Modal({ show, onClose, onSave, initialData }) {
                       value={formData.lastName}
                       onChange={handleChange}
                       onBlur={() => handleBlur('lastName')}
-                      placeholder="Last Name"
+                      placeholder={t('lastName')}
                       error={touchedFields.lastName ? validationErrors.lastName : ''}
                   />
                 </div>
@@ -381,7 +393,7 @@ function Modal({ show, onClose, onSave, initialData }) {
                     value={formData.email}
                     onChange={handleChange}
                     onBlur={() => handleBlur('email')}
-                    placeholder="Email Address"
+                    placeholder={t('emailAddress')}
                     error={touchedFields.email ? (validationErrors.email || serverErrors.email) : ''}
                 />
 
@@ -393,7 +405,7 @@ function Modal({ show, onClose, onSave, initialData }) {
                       value={formData.bio}
                       onChange={handleChange}
                       onBlur={() => handleBlur('bio')}
-                      placeholder="Tell us about yourself..."
+                      placeholder={t('tellUsAboutYourself')}
                       className={`w-full h-32 bg-background text-text rounded-lg border-2 
                          px-10 py-2 focus:outline-none transition-all duration-300 
                          placeholder:text-primary/50 resize-none ${
@@ -415,7 +427,7 @@ function Modal({ show, onClose, onSave, initialData }) {
                         value={formData.newPassword}
                         onChange={handleChange}
                         onBlur={() => handleBlur('newPassword')}
-                        placeholder="New Password"
+                        placeholder={t('newPassword')}
                         error={touchedFields.newPassword ? validationErrors.newPassword : ''}
                     />
                     <button
@@ -433,7 +445,7 @@ function Modal({ show, onClose, onSave, initialData }) {
                       value={formData.confirmNewPassword}
                       onChange={handleChange}
                       onBlur={() => handleBlur('confirmNewPassword')}
-                      placeholder="Confirm New Password"
+                      placeholder={t('confirmNewPassword')}
                       error={touchedFields.confirmNewPassword ? validationErrors.confirmNewPassword : ''}
                   />
                 </div>
@@ -451,7 +463,7 @@ function Modal({ show, onClose, onSave, initialData }) {
                       className="px-6 py-2 rounded-lg border-2 border-btnOutline text-primary
                          hover:bg-secondary/10 transition-all duration-300"
                   >
-                    Cancel
+                    {t('cancel')}
                   </button>
                   <button
                       type="submit"
@@ -460,7 +472,7 @@ function Modal({ show, onClose, onSave, initialData }) {
                          hover:bg-accent text-background transition-all duration-300
                          ${!hasChanges ? 'opacity-50 cursor-not-allowed' : ''}`}
                   >
-                    Save Changes
+                    {t('saveChanges')}
                   </button>
                 </div>
               </form>
