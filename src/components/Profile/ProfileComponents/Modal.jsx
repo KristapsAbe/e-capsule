@@ -152,7 +152,6 @@ function Modal({ show, onClose, onSave, initialData }) {
         setImagePreview(`http://127.0.0.1:8000/storage/${data.user.profileImage}`);
       }
     } catch (error) {
-      console.error('Failed to fetch user profile:', error);
       setErrors(prev => ({ ...prev, general: t('failedToLoadProfile') }));
     }
   };
@@ -181,7 +180,7 @@ function Modal({ show, onClose, onSave, initialData }) {
       setFormData(prev => ({ ...prev, [name]: value }));
 
       if (touchedFields[name]) {
-        const errors = validateProfileForm({ ...formData, [name]: value });
+        const errors = validateProfileForm({ ...formData, [name]: value }, t);
         setValidationErrors(prev => ({ ...prev, [name]: errors[name] }));
       }
     }
@@ -189,9 +188,9 @@ function Modal({ show, onClose, onSave, initialData }) {
 
   const handleBlur = useCallback((fieldName) => {
     setTouchedFields(prev => ({ ...prev, [fieldName]: true }));
-    const errors = validateProfileForm(formData);
+    const errors = validateProfileForm(formData, t);
     setValidationErrors(prev => ({ ...prev, [fieldName]: errors[fieldName] }));
-  }, [formData]);
+  }, [formData, t]);
 
   const handleSubmit = useCallback((e) => {
     e.preventDefault();
@@ -202,7 +201,7 @@ function Modal({ show, onClose, onSave, initialData }) {
     }, {});
     setTouchedFields(allFields);
 
-    const errors = validateProfileForm(formData);
+    const errors = validateProfileForm(formData, t);
     setValidationErrors(errors);
 
     if (Object.keys(errors).length > 0) {

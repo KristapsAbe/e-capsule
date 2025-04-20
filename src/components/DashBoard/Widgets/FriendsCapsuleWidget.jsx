@@ -32,7 +32,6 @@ const FriendsCapsuleWidget = () => {
             } catch (err) {
                 setError(t('failedToFetchFriends'));
                 setLoading(false);
-                console.error('Error fetching friends capsules:', err);
             }
         };
 

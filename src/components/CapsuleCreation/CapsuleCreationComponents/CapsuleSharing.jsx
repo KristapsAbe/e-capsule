@@ -23,7 +23,6 @@ const CapsuleSharing = memo(({ onShareSelectionChange }) => {
         setFriends(acceptedFriends);
       } catch (err) {
         setError(t('failedToFetchFriends'));
-        console.error(err);
       } finally {
         setLoading(false);
       }

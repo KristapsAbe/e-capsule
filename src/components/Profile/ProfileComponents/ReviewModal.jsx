@@ -33,7 +33,6 @@ export default function ReviewModal({ isOpen, onClose, onSubmit }) {
     return (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-50 transition-all duration-300">
             <div className="bg-background border border-accent/30 rounded-2xl shadow-secondary w-full max-w-sm mx-4 overflow-hidden relative">
-                {/* Top gradient line */}
                 <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-secondary via-accent to-button"></div>
 
                 <div className="p-5">

@@ -146,7 +146,6 @@ const CapsuleAcceptModal = ({ isOpen, onClose, capsule, onAcceptComplete }) => {
           })
         });
       } catch (resetErr) {
-        console.error(t('failedToResetStatus'), resetErr);
       }
     } finally {
       setIsSubmitting(false);
@@ -207,8 +206,8 @@ const CapsuleAcceptModal = ({ isOpen, onClose, capsule, onAcceptComplete }) => {
                         <label className="mt-4 flex justify-center items-center p-6 border-2 border-dashed border-accent/30 rounded-lg hover:border-accent transition-colors cursor-pointer bg-secondary/10">
                           <div className="space-y-2 text-center">
                             <Upload className="mx-auto text-primary" size={24} />
-                            <div className="flex text-sm text-primary">
-                              <p className="pl-1">{t('chooseImages')}</p>
+                            <div className="flex text-sm text-primary justify-center">
+                              <p>{t('chooseImages')}</p>
                             </div>
                             <p className="text-xs text-primary/70">PNG, JPG, GIF {t('imageSizeExceeded')}</p>
                           </div>
@@ -238,7 +237,7 @@ const CapsuleAcceptModal = ({ isOpen, onClose, capsule, onAcceptComplete }) => {
                                 <motion.div
                                     key={index}
                                     animate={{ opacity: 1, y: 0 }}
-                                    className="flex space-x-4 items-start p-4 bg-secondary/10 rounded-lg border border-accent/20"
+                                    className="flex space-x-4 items-center p-4 bg-secondary/10 rounded-lg border border-accent/20"
                                     exit={{ opacity: 0, y: -20 }}
                                     initial={{ opacity: 0, y: 20 }}
                                 >

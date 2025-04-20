@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faGoogle, faFacebookF, faInstagram, faDiscord } from '@fortawesome/free-brands-svg-icons';
 import { faCheckCircle, faExclamationCircle, faInfoCircle } from '@fortawesome/free-solid-svg-icons';
 
 function Login() {
@@ -44,14 +43,12 @@ function Login() {
             });
 
             if (!response.ok) {
-                console.error('Failed to fetch initial friend request count');
                 return;
             }
 
             const data = await response.json();
             localStorage.setItem('friendRequestCount', data.count);
         } catch (error) {
-            console.error('Error fetching initial friend request count:', error);
         }
     };
 

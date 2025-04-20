@@ -62,7 +62,6 @@ const AnimatedCapsule = ({ capsuleData }) => {
         setStage(0);
       }
     } catch (err) {
-      console.error('Error processing capsule data:', err);
       setError('Failed to process capsule data');
     } finally {
       setLoading(false);

@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Menu, X, ChevronDown, Bell } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
-import { useLanguage} from "../LanguageContext";
+import { useLanguage } from "../LanguageContext";
 
 const EngFlag = () => (
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 30" width="20" height="10">
@@ -32,7 +32,25 @@ function Header({ notificationCount, onNotificationClick }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLangMenuOpen, setIsLangMenuOpen] = useState(false);
   const location = useLocation();
-  const { currentLang, changeLang, t } = useLanguage(); // Use the language context
+  const { currentLang, changeLang, t } = useLanguage();
+  const sidebarRef = useRef(null);
+  const langMenuRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (sidebarRef.current && !sidebarRef.current.contains(event.target) &&
+          event.target.closest('[data-menu-toggle]') === null) {
+        setIsMenuOpen(false);
+      }
+      if (langMenuRef.current && !langMenuRef.current.contains(event.target) &&
+          event.target.closest('[data-lang-toggle]') === null) {
+        setIsLangMenuOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
   const toggleLangMenu = () => setIsLangMenuOpen(!isLangMenuOpen);
@@ -45,7 +63,7 @@ function Header({ notificationCount, onNotificationClick }) {
   const LangButton = ({ lang, flag: Flag }) => (
       <button
           onClick={() => handleChangeLang(lang)}
-          className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left flex items-center font-lexend"
+          className="px-4 py-2 text-sm text-text hover:bg-secondary w-full text-left flex items-center font-lexend"
       >
         <Flag />
         <span className="ml-2">{lang}</span>
@@ -76,18 +94,20 @@ function Header({ notificationCount, onNotificationClick }) {
   };
 
   return (
-      <header className="w-full bg-background p-2 md:p-4 font-lexend">
+      <header className="w-full bg-background p-2 md:p-4 font-lexend z-20">
         <div className="container mx-auto px-2 sm:px-4">
           <div className="flex items-center justify-between">
-            {/* Logo */}
             <div className="flex items-center flex-shrink-0">
               <h1 className="text-lg md:text-xl text-text font-extrabold tracking-wide font-lexend whitespace-nowrap">
                 E-CAPSULE
               </h1>
             </div>
 
-            <div className="flex items-center space-x-2 md:hidden">
-              <button onClick={onNotificationClick} className="p-1.5 relative font-lexend">
+            <div className="flex items-center space-x-2">
+              <button
+                  onClick={onNotificationClick}
+                  className="p-1.5 relative font-lexend xl:hidden"
+              >
                 <Bell size={20} color="#FFFFFF" />
                 {notificationCount > 0 && (
                     <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
@@ -95,12 +115,16 @@ function Header({ notificationCount, onNotificationClick }) {
                 </span>
                 )}
               </button>
-              <button onClick={toggleMenu} className="text-text p-1.5">
+              <button
+                  onClick={toggleMenu}
+                  className="text-text p-1.5"
+                  data-menu-toggle
+              >
                 {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
               </button>
             </div>
 
-            <nav className="hidden md:flex items-center justify-center flex-grow px-4">
+            <nav className="hidden xl:flex items-center justify-center flex-grow px-4">
               <div className="flex flex-wrap justify-center space-x-2 md:space-x-4 lg:space-x-6 text-sm md:text-base font-lexend">
                 <NavItem href="/Home" translationKey="home" />
                 <NavItem href="/Dashboard" translationKey="dashboard" />
@@ -110,18 +134,19 @@ function Header({ notificationCount, onNotificationClick }) {
               </div>
             </nav>
 
-            <div className="hidden md:flex items-center space-x-2 lg:space-x-3 flex-shrink-0 font-lexend">
-              <div className="relative">
+            <div className="hidden xl:flex items-center space-x-2 lg:space-x-3 flex-shrink-0 font-lexend">
+              <div className="relative" ref={langMenuRef}>
                 <button
                     onClick={toggleLangMenu}
                     className="text-text bg-secondary font-bold rounded-xl py-1.5 px-3 text-xs md:text-sm flex items-center whitespace-nowrap font-lexend"
+                    data-lang-toggle
                 >
                   {currentLang === 'ENG' ? <EngFlag /> : <LatFlag />}
                   <span className="ml-2">{currentLang}</span>
                   <ChevronDown size={16} className="ml-1" />
                 </button>
                 {isLangMenuOpen && (
-                    <div className="absolute right-0 mt-2 w-28 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50">
+                    <div className="absolute right-0 mt-2 w-28 rounded-md shadow-lg bg-background text-text ring-1 ring-black ring-opacity-5 z-50">
                       <div className="py-1 font-lexend">
                         <LangButton lang="ENG" flag={EngFlag} />
                         <LangButton lang="LAT" flag={LatFlag} />
@@ -150,36 +175,77 @@ function Header({ notificationCount, onNotificationClick }) {
               </button>
             </div>
           </div>
-
-          {isMenuOpen && (
-              <nav className="mt-4 md:hidden">
-                <div className="flex flex-col space-y-4 font-light font-lexend">
-                  <NavItem href="/Home" translationKey="home" />
-                  <NavItem href="/Dashboard" translationKey="dashboard" />
-                  <NavItem href="/Profile" translationKey="profile" />
-                  <NavItem href="/CapsuleCreation" translationKey="createCapsule" />
-                  <NavItem href="/Friends" translationKey="discover" />
-
-                  <div className="pt-4 flex flex-col space-y-3">
-                    <button
-                        onClick={toggleLangMenu}
-                        className="text-text bg-secondary w-full rounded-xl py-2 flex items-center justify-center font-lexend"
-                    >
-                      {currentLang === 'ENG' ? <EngFlag /> : <LatFlag />}
-                      <span className="ml-2">{currentLang}</span>
-                      <ChevronDown size={16} className="ml-1" />
-                    </button>
-                    <button
-                        onClick={handleLogout}
-                        className="text-text bg-secondary w-full rounded-xl py-2 font-lexend"
-                    >
-                      {t('logout')}
-                    </button>
-                  </div>
-                </div>
-              </nav>
-          )}
         </div>
+
+        <div
+            className={`fixed inset-y-0 right-0 transform ${
+                isMenuOpen ? 'translate-x-0' : 'translate-x-full'
+            } w-64 bg-background shadow-lg transition-transform duration-300 ease-in-out z-40 overflow-y-auto`}
+            ref={sidebarRef}
+        >
+          <div className="p-6">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-xl font-bold text-text">E-CAPSULE</h2>
+              <button onClick={toggleMenu} className="text-text p-1">
+                <X size={24} />
+              </button>
+            </div>
+
+            <div className="flex flex-col space-y-6 font-light">
+              <NavItem href="/Home" translationKey="home" />
+              <NavItem href="/Dashboard" translationKey="dashboard" />
+              <NavItem href="/Profile" translationKey="profile" />
+              <NavItem href="/CapsuleCreation" translationKey="createCapsule" />
+              <NavItem href="/Friends" translationKey="discover" />
+
+              <div className="pt-6 flex flex-col space-y-4">
+                <div className="relative">
+                  <button
+                      onClick={toggleLangMenu}
+                      className="text-text bg-secondary w-full rounded-xl py-2 flex items-center justify-center font-lexend"
+                  >
+                    {currentLang === 'ENG' ? <EngFlag /> : <LatFlag />}
+                    <span className="ml-2">{currentLang}</span>
+                    <ChevronDown size={16} className="ml-1" />
+                  </button>
+                  {isLangMenuOpen && (
+                      <div className="absolute left-0 mt-2 w-full rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50">
+                        <div className="py-1 font-lexend">
+                          <LangButton lang="ENG" flag={EngFlag} />
+                          <LangButton lang="LAT" flag={LatFlag} />
+                        </div>
+                      </div>
+                  )}
+                </div>
+                <button
+                    onClick={handleLogout}
+                    className="text-text bg-secondary w-full rounded-xl py-2 font-lexend"
+                >
+                  {t('logout')}
+                </button>
+                <button
+                    onClick={onNotificationClick}
+                    className="text-text bg-secondary w-full rounded-xl py-2 font-lexend flex items-center justify-center"
+                >
+                  <Bell size={20} className="mr-2" />
+                  {t('notifications')}
+                  {notificationCount > 0 && (
+                      <span className="ml-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                    {notificationCount}
+                  </span>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {isMenuOpen && (
+            <div
+                className="fixed inset-0 bg-black bg-opacity-50 z-30"
+                onClick={toggleMenu}
+            ></div>
+        )}
       </header>
   );
 }

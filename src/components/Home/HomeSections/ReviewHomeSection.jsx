@@ -17,7 +17,6 @@ const ReviewHomeSection = ({ fadeIn }) => {
                 setReviews(response.data.data);
                 setLoading(false);
             } catch (err) {
-                console.error('Error fetching reviews:', err);
                 setError(t('failedToLoadActivity'));
                 setLoading(false);
             }

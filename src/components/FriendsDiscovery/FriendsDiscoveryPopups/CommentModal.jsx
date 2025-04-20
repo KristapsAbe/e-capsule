@@ -73,6 +73,7 @@ const CommentModal = ({ isOpen, onClose, capsule }) => {
                 placeholder="Write your comment..."
                 className="w-full p-3 rounded-lg bg-white/5 border border-white/10 text-text resize-none min-h-24"
                 required
+                maxLength={90}
             />
 
                         {error && (

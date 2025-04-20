@@ -11,11 +11,11 @@ import NotificationSidebar from './components/NotificationSidebar';
 import CapsuleAcceptModal from './components/CapsuleAcceptModal';
 import Home from './components/Home/Home';
 import { Toaster } from 'react-hot-toast';
-import { LanguageProvider} from "./LanguageContext";
+import { LanguageProvider } from "./LanguageContext";
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 
-function App() {
+function AppContent() {
   const location = useLocation();
   const currentPath = location.pathname.toLowerCase().replace(/\/+$/, '');
   const shouldShowHeader = !['/login', '/register', '/email-verification'].includes(currentPath);
@@ -28,7 +28,6 @@ function App() {
   const handleCapsuleAccept = useCallback((capsuleData) => {
     return new Promise((resolve, reject) => {
       try {
-        console.log('handleCapsuleAccept called with:', capsuleData);
         if (!capsuleData || !capsuleData.share_id) {
           reject(new Error('Invalid capsule data'));
           return;
@@ -37,7 +36,6 @@ function App() {
         setIsAcceptModalOpen(true);
         resolve();
       } catch (error) {
-        console.error('Error in handleCapsuleAccept:', error);
         reject(error);
       }
     });
@@ -59,81 +57,47 @@ function App() {
     }
   }, []);
 
-  useEffect(() => {
-    console.log('Modal state changed:', { isAcceptModalOpen, selectedCapsule });
-  }, [isAcceptModalOpen, selectedCapsule]);
-
-  // Create a single instance of NotificationSidebar component
-  const notificationSidebar = (
-      <NotificationSidebar
-          isOpen={isNotificationSidebarOpen}
-          onClose={() => setIsNotificationSidebarOpen(false)}
-          onUpdateCount={setNotificationCount}
-          onCapsuleAccept={handleCapsuleAccept}
-          fetchFriendRequestCount={fetchFriendRequestCount}
-      />
-  );
-
-  // Create a single instance of CapsuleAcceptModal component
-  const capsuleAcceptModal = isAcceptModalOpen && selectedCapsule && (
-      <CapsuleAcceptModal
-          isOpen={isAcceptModalOpen}
-          onClose={() => {
-            console.log('Modal closing');
-            setIsAcceptModalOpen(false);
-            setSelectedCapsule(null);
-          }}
-          capsule={selectedCapsule}
-          onAcceptComplete={() => {
-            console.log('Accept complete');
-            setIsAcceptModalOpen(false);
-            setSelectedCapsule(null);
-          }}
-      />
-  );
-
   return (
       <div className="relative min-h-screen">
         <Toaster position="top-right" />
         {shouldShowHeader && (
             <Header
                 notificationCount={notificationCount}
-                onNotificationClick={() => setIsNotificationSidebarOpen(true)}
+                onNotificationClick={() => setIsNotificationSidebarOpen(!isNotificationSidebarOpen)}
+            />
+        )}
+
+        <NotificationSidebar
+            isOpen={isNotificationSidebarOpen}
+            onClose={() => setIsNotificationSidebarOpen(false)}
+            onUpdateCount={setNotificationCount}
+            onCapsuleAccept={handleCapsuleAccept}
+            fetchFriendRequestCount={fetchFriendRequestCount}
+        />
+
+        {isAcceptModalOpen && selectedCapsule && (
+            <CapsuleAcceptModal
+                isOpen={isAcceptModalOpen}
+                onClose={() => {
+                  setIsAcceptModalOpen(false);
+                  setSelectedCapsule(null);
+                }}
+                capsule={selectedCapsule}
+                onAcceptComplete={() => {
+                  setIsAcceptModalOpen(false);
+                  setSelectedCapsule(null);
+                }}
             />
         )}
 
         <Routes>
-          <Route path="/dashboard" element={
-            <>
-              <DashBoard />
-              {notificationSidebar}
-              {capsuleAcceptModal}
-            </>
-          } />
+          <Route path="/dashboard" element={<DashBoard />} />
           <Route path="/login" element={<Login />} />
           <Route path="/home" element={<Home />} />
           <Route path="/register" element={<Register />} />
-          <Route path="/profile" element={
-            <>
-              <Profile />
-              {notificationSidebar}
-              {capsuleAcceptModal}
-            </>
-          } />
-          <Route path="/CapsuleCreation" element={
-            <>
-              <CapsuleCreation />
-              {notificationSidebar}
-              {capsuleAcceptModal}
-            </>
-          } />
-          <Route path="/friends" element={
-            <>
-              <Friends />
-              {notificationSidebar}
-              {capsuleAcceptModal}
-            </>
-          } />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/CapsuleCreation" element={<CapsuleCreation />} />
+          <Route path="/friends" element={<Friends />} />
         </Routes>
       </div>
   );
@@ -143,7 +107,7 @@ export default function AppWrapper() {
   return (
       <Router>
         <LanguageProvider>
-          <App />
+          <AppContent />
         </LanguageProvider>
       </Router>
   );

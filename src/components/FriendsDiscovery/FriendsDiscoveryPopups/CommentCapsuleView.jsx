@@ -32,7 +32,6 @@ const CommentCapsuleView = ({ isOpen, onClose, capsule }) => {
 
             setComments(response.data.comments);
         } catch (err) {
-            console.error('Error fetching comments:', err);
             setError('Unable to load comments. Please try again later.');
         } finally {
             setLoading(false);

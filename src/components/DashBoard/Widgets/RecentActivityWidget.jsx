@@ -19,7 +19,6 @@ const RecentActivityWidget = ({ onViewAll, onClose }) => {
             } catch (err) {
                 setError(t('failedToLoadActivity'));
                 setLoading(false);
-                console.error('Error fetching activity:', err);
             }
         };
 

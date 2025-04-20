@@ -39,7 +39,6 @@ const UserModal = memo(({ user, onClose, onSendRequest, isPending }) => {
         }
 
         const url = `http://127.0.0.1:8000/api/friends/${user.id}/capsules`;
-        console.log('Fetching capsules from:', url);
 
         const response = await axios.get(url, {
           headers: {
@@ -47,11 +46,7 @@ const UserModal = memo(({ user, onClose, onSendRequest, isPending }) => {
           },
         });
 
-        console.log('Response:', response);
-
         if (response.data.status === 'success') {
-          console.log('Capsules data:', response.data.data);
-
           let capsuleArray = response.data.data;
           if (!Array.isArray(capsuleArray) && typeof capsuleArray === 'object') {
             capsuleArray = Object.values(capsuleArray);
@@ -81,12 +76,9 @@ const UserModal = memo(({ user, onClose, onSendRequest, isPending }) => {
           );
           setIsFriend(hasFriendOnlyCapsules);
         } else {
-          console.error('Failed to fetch capsules:', response.data);
           setError('Failed to fetch capsules');
         }
       } catch (err) {
-        console.error('Error fetching capsules:', err);
-        console.error('Response data:', err.response?.data);
         setError(err.response?.data?.message || err.message);
       } finally {
         setCapsuleLoading(false);
@@ -199,10 +191,9 @@ const UserModal = memo(({ user, onClose, onSendRequest, isPending }) => {
     const [commentMode, setCommentMode] = useState('add');
     const [isCommentViewOpen, setIsCommentViewOpen] = useState(false);
     const [localSelectedCapsule, setLocalSelectedCapsule] = useState(null);
+    const [imageError, setImageError] = useState(false);
 
-    console.log('Parsed images:', images);
-
-    const imageBaseUrl = '/';
+    const imageBaseUrl = 'http://127.0.0.1:8000/storage/';
 
     const handleCapsuleClick = (e) => {
       e.stopPropagation();
@@ -212,8 +203,8 @@ const UserModal = memo(({ user, onClose, onSendRequest, isPending }) => {
 
     const handleAddComment = (e) => {
       e.stopPropagation();
-        setCommentMode('add');
-        setLocalSelectedCapsule(capsule);
+      setCommentMode('add');
+      setLocalSelectedCapsule(capsule);
     };
 
     const handleCloseComment = () => {
@@ -222,7 +213,7 @@ const UserModal = memo(({ user, onClose, onSendRequest, isPending }) => {
 
     const handleViewComments = (e) => {
       e.stopPropagation();
-        setIsCommentViewOpen(true);
+      setIsCommentViewOpen(true);
     };
 
     const handleCloseCommentView = () => {
@@ -248,22 +239,22 @@ const UserModal = memo(({ user, onClose, onSendRequest, isPending }) => {
                   title={`Privacy: ${capsule.privacy}`}
               />
 
-                  <div className="flex items-center text-xs px-2 py-1 rounded-full bg-white/10 backdrop-blur-sm">
-                    <Unlock size={12} style={{color: styles.accent}} className="mr-1"/>
-                    <span style={{color: styles.accent}}>{t('ready')}</span>
-                  </div>
+              <div className="flex items-center text-xs px-2 py-1 rounded-full bg-white/10 backdrop-blur-sm">
+                <Unlock size={12} style={{color: styles.accent}} className="mr-1"/>
+                <span style={{color: styles.accent}}>{t('ready')}</span>
+              </div>
             </div>
           </div>
 
           <div className="p-2 flex items-center">
             <div className="w-16 h-16 rounded overflow-hidden mr-3 relative bg-black/40">
-              {hasImages && images.length > 0 ? (
+              {hasImages && images.length > 0 && !imageError ? (
                   <img
                       src={`${imageBaseUrl}${images[0]}`}
                       alt="Memory preview"
                       className={`w-full h-full object-cover blur-sm ${styles.filter}`}
                       onError={(e) => {
-                        console.error('Image failed to load:', `${imageBaseUrl}${images[0]}`);
+                        setImageError(true);
                         e.target.onerror = null;
                       }}
                   />
@@ -289,22 +280,22 @@ const UserModal = memo(({ user, onClose, onSendRequest, isPending }) => {
                 })}
               </span>
                 </div>
-                    <div className="flex items-center space-x-2">
-                      <button
-                          onClick={handleAddComment}
-                          className="p-1 rounded-full hover:bg-white/10 transition-colors"
-                          title={t('addComment')}
-                      >
-                        <MessageSquarePlus size={14} style={{color: styles.accent}}/>
-                      </button>
-                      <button
-                          onClick={handleViewComments}
-                          className="p-1 rounded-full hover:bg-white/10 transition-colors"
-                          title={t('viewComments')}
-                      >
-                        <MessageSquare size={14} style={{color: styles.accent}}/>
-                      </button>
-                    </div>
+                <div className="flex items-center space-x-2">
+                  <button
+                      onClick={handleAddComment}
+                      className="p-1 rounded-full hover:bg-white/10 transition-colors"
+                      title={t('addComment')}
+                  >
+                    <MessageSquarePlus size={14} style={{color: styles.accent}}/>
+                  </button>
+                  <button
+                      onClick={handleViewComments}
+                      className="p-1 rounded-full hover:bg-white/10 transition-colors"
+                      title={t('viewComments')}
+                  >
+                    <MessageSquare size={14} style={{color: styles.accent}}/>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -460,13 +451,11 @@ const FriendsPage = () => {
         } else {
           setAllUsers([]);
           setTotalUsers(0);
-          console.error('Unexpected API response structure:', data);
         }
 
         setError(null);
       } catch (error) {
         if (error.name !== 'AbortError') {
-          console.error('Error fetching users:', error);
           setError(error.message);
           toast.error('Failed to load users: ' + error.message);
           setAllUsers([]);
@@ -560,7 +549,6 @@ const FriendsPage = () => {
           )
       );
     } catch (error) {
-      console.error('Error sending friend request:', error);
       toast.error(t('failedToSendRequest'));
     } finally {
       setPendingRequests(prev => {

@@ -46,10 +46,10 @@ function CapsuleCreation() {
 
     useEffect(() => {
         if (attemptedNext) {
-            const errors = validateStep(currentStep, formData);
+            const errors = validateStep(currentStep, formData, t);
             setStepErrors(errors);
         }
-    }, [formData, currentStep, attemptedNext]);
+    }, [formData, currentStep, attemptedNext, t]);
 
     const handleInputChange = (e) => {
         const {name, value} = e.target;
@@ -65,7 +65,7 @@ function CapsuleCreation() {
         const validFiles = [];
 
         files.forEach(file => {
-            const error = validateFile(file);
+            const error = validateFile(file, t);
             if (error) {
                 fileErrors.push({file: file.name, error});
             } else {
@@ -114,7 +114,7 @@ function CapsuleCreation() {
 
     const handleNextStep = () => {
         setAttemptedNext(true);
-        const errors = validateStep(currentStep, formData);
+        const errors = validateStep(currentStep, formData, t);
         setStepErrors(errors);
 
         if (Object.keys(errors).length === 0) {
@@ -131,7 +131,7 @@ function CapsuleCreation() {
     };
 
     const createCapsule = async () => {
-        const errors = validateStep(currentStep, formData);
+        const errors = validateStep(currentStep, formData, t);
         if (Object.keys(errors).length > 0) {
             setStepErrors(errors);
             return;

@@ -230,7 +230,6 @@ const Profile = () => {
                     fetchCapsules()
                 ]);
             } catch (err) {
-                console.error("Error fetching data:", err);
             }
         };
 
@@ -247,7 +246,15 @@ const Profile = () => {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    const handlePrivacyChange = async (privacy) => {
+    const handlePrivacyChange = async (option) => {
+        const privacyMapping = {
+            [t('private')]: 'private',
+            [t('public')]: 'public',
+            [t('friendsOnly')]: 'friends_only'
+        };
+
+        const privacyValue = privacyMapping[option];
+
         const token = localStorage.getItem('access_token');
         try {
             const response = await fetch('http://127.0.0.1:8000/api/user/privacy', {
@@ -256,7 +263,7 @@ const Profile = () => {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({privacy: privacy.toLowerCase().replace(' ', '_')})
+                body: JSON.stringify({privacy: privacyValue})
             });
             const data = await response.json();
             setUser(prev => ({...prev, privacy: data.privacy}));
@@ -335,6 +342,16 @@ const Profile = () => {
         }
     };
 
+    const getPrivacyTranslation = (privacyValue) => {
+        const mappings = {
+            'public': 'public',
+            'private': 'private',
+            'friends_only': 'friendsOnly'
+        };
+
+        return mappings[privacyValue] ? t(mappings[privacyValue]) : t('public');
+    };
+
     if (!user) {
         return (
             <div className="min-h-screen flex items-center justify-center">
@@ -375,7 +392,8 @@ const Profile = () => {
                                 </button>
                             </div>
                             <p className="mt-2">
-                                {t('privacy')}: {user.privacy ? t(user.privacy.toLowerCase()) : t('public')}                            </p>
+                                {t('privacy')}: {user.privacy ? getPrivacyTranslation(user.privacy) : t('public')}
+                            </p>
                         </div>
 
                         <div className="flex flex-wrap gap-3 justify-center md:justify-end">
