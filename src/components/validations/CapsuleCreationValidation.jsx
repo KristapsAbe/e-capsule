@@ -72,7 +72,7 @@ export const validateFile = (file, t) => {
     }
     if (file.size > MAX_FILE_SIZE) {
         return t('fileSizeTooLarge', { size: MAX_FILE_SIZE / 1024 / 1024 }) ||
-            `File size must be less than ${MAX_FILE_SIZE / 1024 / 1024}MB`;
+            `File size must be less than 64MB`;
     }
     return null;
 };
