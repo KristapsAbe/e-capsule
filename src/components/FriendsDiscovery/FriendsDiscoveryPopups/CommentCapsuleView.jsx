@@ -24,7 +24,7 @@ const CommentCapsuleView = ({ isOpen, onClose, capsule }) => {
         try {
             const token = localStorage.getItem('access_token');
 
-            const response = await axios.get(`http://127.0.0.1:8000/api/capsule-comments/${capsule.id}`, {
+            const response = await axios.get(`https://www.e-capsule.digital/backend/public/api/capsule-comments/${capsule.id}`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }

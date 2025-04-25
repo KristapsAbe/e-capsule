@@ -28,7 +28,7 @@ function Register() {
         setSuccess('');
 
         try {
-            const response = await fetch('http://127.0.0.1:8000/api/register', {
+            const response = await fetch('https://www.e-capsule.digital/backend/public/api/register', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -64,7 +64,7 @@ function Register() {
         setSuccess('');
 
         try {
-            const response = await fetch('http://127.0.0.1:8000/api/verify-email', {
+            const response = await fetch('https://www.e-capsule.digital/backend/public/api/verify-email', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

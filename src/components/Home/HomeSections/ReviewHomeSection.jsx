@@ -13,7 +13,7 @@ const ReviewHomeSection = ({ fadeIn }) => {
         const fetchReviews = async () => {
             try {
                 setLoading(true);
-                const response = await axios.get('http://127.0.0.1:8000/api/high-rated-reviews');
+                const response = await axios.get('https://www.e-capsule.digital/backend/public/api/high-rated-reviews');
                 setReviews(response.data.data);
                 setLoading(false);
             } catch (err) {

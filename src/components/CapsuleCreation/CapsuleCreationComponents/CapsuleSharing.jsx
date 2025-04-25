@@ -12,7 +12,7 @@ const CapsuleSharing = memo(({ onShareSelectionChange }) => {
   useEffect(() => {
     const fetchFriends = async () => {
       try {
-        const response = await fetch('http://127.0.0.1:8000/api/friends', {
+        const response = await fetch('https://www.e-capsule.digital/backend/public/api/friends', {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('access_token')}`
           }
@@ -90,6 +90,13 @@ const CapsuleSharing = memo(({ onShareSelectionChange }) => {
 
 const FriendItem = memo(({ friend, isSelected, onToggle }) => {
   const { t } = useLanguage();
+  const [imgSrc, setImgSrc] = useState(friend.profile_image_url || null);
+  const [imgError, setImgError] = useState(false);
+
+  const handleImageError = () => {
+    setImgError(true);
+    setImgSrc(`${process.env.PUBLIC_URL}/images/defaultAvatar.jpg`);
+  };
 
   return (
       <div
@@ -100,11 +107,12 @@ const FriendItem = memo(({ friend, isSelected, onToggle }) => {
               : 'hover:bg-[#A3688F] hover:bg-opacity-10'
           }`}
       >
-        {friend.profile_image_url ? (
+        {imgSrc && !imgError ? (
             <img
-                src={friend.profile_image_url}
+                src={imgSrc}
                 alt={friend.name}
                 className="w-10 h-10 rounded-full object-cover"
+                onError={handleImageError}
             />
         ) : (
             <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">

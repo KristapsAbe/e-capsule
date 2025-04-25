@@ -21,7 +21,7 @@ const FriendsCapsuleWidget = () => {
                     return;
                 }
 
-                const response = await axios.get('http://127.0.0.1:8000/api/friends/capsules', {
+                const response = await axios.get('https://www.e-capsule.digital/backend/public/api/friends/capsules', {
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }
@@ -40,7 +40,8 @@ const FriendsCapsuleWidget = () => {
 
     if (loading) {
         return (
-            <div className='bg-accent/10 backdrop-blur-lg p-5 rounded-2xl shadow-secondary h-full flex items-center justify-center'>
+            <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                 className='bg-accent/10 backdrop-blur-lg p-5 rounded-2xl shadow-secondary'>
                 <div className="text-text">{t('loadingFriendsData')}</div>
             </div>
         );
@@ -48,17 +49,19 @@ const FriendsCapsuleWidget = () => {
 
     if (error) {
         return (
-            <div className='bg-accent/10 backdrop-blur-lg p-5 rounded-2xl shadow-secondary h-full flex items-center justify-center'>
+            <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                 className='bg-accent/10 backdrop-blur-lg p-5 rounded-2xl shadow-secondary'>
                 <div className="text-text">{error}</div>
             </div>
         );
     }
 
     return (
-        <div className='bg-accent/10 backdrop-blur-lg p-5 rounded-2xl shadow-secondary h-full flex flex-col border border-accent/30 relative overflow-hidden'>
+        <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}
+             className='bg-accent/10 backdrop-blur-lg p-5 rounded-2xl shadow-secondary border border-accent/30 relative overflow-hidden'>
             <div className="absolute top-1/2 right-0 w-24 h-24 bg-button/10 rounded-full blur-2xl -mr-5"></div>
 
-            <div className='flex items-center mb-4'>
+            <div style={{ flexShrink: 0 }} className='flex items-center mb-4'>
                 <div className="w-1 h-6 bg-button rounded-full mr-2"></div>
                 <h3 className='text-text font-bold'>{t('friendsCapsules')}</h3>
                 <button className='ml-auto bg-background/40 w-6 h-6 rounded-full flex items-center justify-center backdrop-blur-sm hover:bg-background/60 transition-all'>
@@ -66,7 +69,7 @@ const FriendsCapsuleWidget = () => {
                 </button>
             </div>
 
-            <div className='flex-grow'>
+            <div style={{ flexGrow: 1, overflowY: 'auto' }} className='timeline-scrollbar'>
                 {friendsCapsules.length > 0 ? (
                     friendsCapsules.map((friend) => (
                         <div key={friend.id} className='flex items-center justify-between py-2 border-b border-accent/20 hover:bg-background/20 px-2 rounded-lg transition-all duration-200 cursor-pointer'>
@@ -103,7 +106,9 @@ const FriendsCapsuleWidget = () => {
                 )}
             </div>
 
-            <InviteFriendsButton t={t} />
+            <div style={{ flexShrink: 0, marginTop: '1rem' }}>
+                <InviteFriendsButton t={t} />
+            </div>
         </div>
     );
 };

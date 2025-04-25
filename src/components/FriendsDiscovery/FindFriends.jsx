@@ -38,7 +38,7 @@ const UserModal = memo(({ user, onClose, onSendRequest, isPending }) => {
           throw new Error('No access token found');
         }
 
-        const url = `http://127.0.0.1:8000/api/friends/${user.id}/capsules`;
+        const url = `https://www.e-capsule.digital/backend/public/api/friends/${user.id}/capsules`;
 
         const response = await axios.get(url, {
           headers: {
@@ -193,7 +193,7 @@ const UserModal = memo(({ user, onClose, onSendRequest, isPending }) => {
     const [localSelectedCapsule, setLocalSelectedCapsule] = useState(null);
     const [imageError, setImageError] = useState(false);
 
-    const imageBaseUrl = 'http://127.0.0.1:8000/storage/';
+    const imageBaseUrl = 'https://www.e-capsule.digital/backend/public/storage/';
 
     const handleCapsuleClick = (e) => {
       e.stopPropagation();
@@ -425,7 +425,7 @@ const FriendsPage = () => {
 
       try {
         const response = await fetch(
-            `http://127.0.0.1:8000/api/friends`,
+            `https://www.e-capsule.digital/backend/public/api/friends`,
             {
               headers: {
                 'Authorization': `Bearer ${token}`,
@@ -517,7 +517,7 @@ const FriendsPage = () => {
     }
 
     try {
-      const response = await fetch('http://127.0.0.1:8000/api/friends/request', {
+      const response = await fetch('https://www.e-capsule.digital/backend/public/api/friends/request', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

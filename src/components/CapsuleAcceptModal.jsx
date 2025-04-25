@@ -9,7 +9,7 @@ const CapsuleAcceptModal = ({ isOpen, onClose, capsule, onAcceptComplete }) => {
   const [imageComments, setImageComments] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
-  const API_BASE_URL = 'http://127.0.0.1:8000';
+  const API_BASE_URL = 'https://www.e-capsule.digital/backend/public';
 
   useEffect(() => {
     if (!isOpen) {
@@ -255,7 +255,7 @@ const CapsuleAcceptModal = ({ isOpen, onClose, capsule, onAcceptComplete }) => {
                                       <div>
                                         <p className="text-sm text-text font-medium">{image.name}</p>
                                         <p className="text-xs text-primary">
-                                          {(image.size / 1024 / 1024).toFixed(2)} MB
+                                          {(image.size / 1024 / 1024).toFixed(64)} MB
                                         </p>
                                       </div>
                                       <button

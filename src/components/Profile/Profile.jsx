@@ -17,7 +17,7 @@ const Profile = () => {
     const [friendCount, setFriendCount] = useState(0);
     const [capsuleCount, setCapsuleCount] = useState(0);
     const [showSettings, setShowSettings] = useState(false);
-    const [imgSrc, setImgSrc] = useState('/images/DefaultAvatar.jpg');
+    const [imgSrc, setImgSrc] = useState('/images/defaultAvatar.jpg');
     const [showEditModal, setShowEditModal] = useState(false);
     const [selectedCapsule, setSelectedCapsule] = useState(null);
     const [showCapsule, setShowCapsule] = useState(false);
@@ -46,7 +46,7 @@ const Profile = () => {
 
         try {
             const token = localStorage.getItem('access_token');
-            const response = await fetch('http://127.0.0.1:8000/api/reviews/should-show', {
+            const response = await fetch('https://www.e-capsule.digital/backend/public/api/reviews/should-show', {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Accept': 'application/json',
@@ -69,7 +69,7 @@ const Profile = () => {
     const handleReviewSubmit = async (reviewData) => {
         try {
             const token = localStorage.getItem('access_token');
-            await fetch('http://127.0.0.1:8000/api/reviews', {
+            await fetch('https://www.e-capsule.digital/backend/public/api/reviews', {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -96,7 +96,7 @@ const Profile = () => {
 
         const fetchUserData = async () => {
             try {
-                const response = await fetch('http://127.0.0.1:8000/api/user', {
+                const response = await fetch('https://www.e-capsule.digital/backend/public/api/user', {
                     headers: {
                         'Authorization': `Bearer ${token}`,
                         'Accept': 'application/json',
@@ -106,7 +106,7 @@ const Profile = () => {
                 setUser(data);
                 localStorage.setItem('user_id', data.id.toString());
                 if (data.profile_image) {
-                    setImgSrc(`http://127.0.0.1:8000/storage/${data.profile_image}`);
+                    setImgSrc(`https://www.e-capsule.digital/backend/public/storage/${data.profile_image}`);
                 }
 
                 if (data) {
@@ -123,7 +123,7 @@ const Profile = () => {
 
         const fetchAcceptedFriends = async () => {
             try {
-                const response = await fetch('http://127.0.0.1:8000/api/friends/accepted', {
+                const response = await fetch('https://www.e-capsule.digital/backend/public/api/friends/accepted', {
                     headers: {
                         'Authorization': `Bearer ${token}`,
                         'Accept': 'application/json',
@@ -145,10 +145,10 @@ const Profile = () => {
         const fetchCounts = async () => {
             try {
                 const [friendsRes, capsulesRes] = await Promise.all([
-                    fetch('http://127.0.0.1:8000/api/friends/count', {
+                    fetch('https://www.e-capsule.digital/backend/public/api/friends/count', {
                         headers: {'Authorization': `Bearer ${token}`},
                     }),
-                    fetch('http://127.0.0.1:8000/api/capsules/count', {
+                    fetch('https://www.e-capsule.digital/backend/public/api/capsules/count', {
                         headers: {'Authorization': `Bearer ${token}`},
                     })
                 ]);
@@ -174,7 +174,7 @@ const Profile = () => {
                     return;
                 }
 
-                const response = await fetch('http://127.0.0.1:8000/api/capsules', {
+                const response = await fetch('https://www.e-capsule.digital/backend/public/api/capsules', {
                     headers: {
                         'Authorization': `Bearer ${token}`,
                         'Accept': 'application/json',
@@ -257,7 +257,7 @@ const Profile = () => {
 
         const token = localStorage.getItem('access_token');
         try {
-            const response = await fetch('http://127.0.0.1:8000/api/user/privacy', {
+            const response = await fetch('https://www.e-capsule.digital/backend/public/api/user/privacy', {
                 method: 'PUT',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -314,7 +314,7 @@ const Profile = () => {
         setIsRemoving(true);
 
         try {
-            const response = await fetch(`http://127.0.0.1:8000/api/friends/${friendId}`, {
+            const response = await fetch(`https://www.e-capsule.digital/backend/public/api/friends/${friendId}`, {
                 method: 'DELETE',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -372,7 +372,9 @@ const Profile = () => {
                                     src={imgSrc}
                                     alt={t('profile')}
                                     className="w-full h-full object-cover"
-                                    onError={() => setImgSrc('/images/DefaultAvatar.jpg')}
+                                    onError={(e) => {
+                                        e.target.src = `${process.env.PUBLIC_URL}/images/defaultAvatar.jpg`
+                                    }}
                                 />
                             </div>
                             <button
@@ -447,11 +449,11 @@ const Profile = () => {
                                     <div key={friend.id} className="flex-shrink-0 flex flex-col items-center m-1">
                                         <div className="w-24 h-24 rounded-full overflow-hidden ring-2 ring-pink-200">
                                             <img
-                                                src={friend.profile_image_url || '/images/DefaultAvatar.jpg'}
+                                                src={friend.profile_image_url || '/images/defaultAvatar.jpg'}
                                                 alt={friend.name}
                                                 className="w-24 h-24 object-cover"
                                                 onError={(e) => {
-                                                    e.target.src = '/images/DefaultAvatar.jpg';
+                                                    e.target.src = '/images/defaultAvatar.jpg';
                                                 }}
                                             />
                                         </div>
@@ -495,11 +497,13 @@ const Profile = () => {
                     {showCapsule && selectedCapsule && (
                         <div
                             className="fixed inset-0 z-50 flex items-center justify-center bg-background/95 backdrop-blur-sm">
-                            <div className="relative w-full h-[90vh] max-w-7xl mx-auto">
-                                <AnimatedCapsule capsuleData={selectedCapsule}/>
+                            <div className="relative w-full max-w-7xl mx-auto flex flex-col items-center justify-center">
+                                <div className="w-full min-h-[50vh] max-h-[90vh] overflow-y-auto">
+                                    <AnimatedCapsule capsuleData={selectedCapsule}/>
+                                </div>
 
                                 <div className="absolute top-6 left-1/2 -translate-x-1/2 text-center z-10">
-                                    <h2 className="text-2xl font-lexend font-bold text-text mb-2">
+                                    <h2 className="text-2xl font-lexend font-bold text-text mt-8">
                                         {selectedCapsule.title}
                                     </h2>
                                 </div>
@@ -526,7 +530,7 @@ const Profile = () => {
                         <div
                             className="fixed inset-0 z-50 flex items-center justify-center bg-background/95 backdrop-blur-sm">
                             <div
-                                className="bg-background rounded-2xl shadow-custom p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+                                className="bg-background rounded-2xl shadow-custom p-6 w-full max-w-2xl min-h-[30vh] max-h-[90vh] overflow-y-auto">
                                 <div className="flex justify-between items-center mb-4">
                                     <h2 className="text-2xl font-bold">{t('friends')}</h2>
                                     <button
@@ -536,33 +540,39 @@ const Profile = () => {
                                         <X size={24} className="text-text"/>
                                     </button>
                                 </div>
-                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                                    {friends.map((friend) => (
-                                        <div key={friend.id} className="flex flex-col items-center relative group">
-                                            <div
-                                                className="w-20 h-20 rounded-full overflow-hidden ring-2 ring-pink-200">
-                                                <img
-                                                    src={friend.profile_image_url || '/images/DefaultAvatar.jpg'}
-                                                    alt={friend.name}
-                                                    className="w-full h-full object-cover"
-                                                    onError={(e) => {
-                                                        e.target.src = '/images/DefaultAvatar.jpg';
-                                                    }}
-                                                />
-                                            </div>
-                                            <p className="mt-2 text-center text-sm truncate w-full">{friend.name}</p>
+                                {friends.length > 0 ? (
+                                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                                        {friends.map((friend) => (
+                                            <div key={friend.id} className="flex flex-col items-center relative group">
+                                                <div
+                                                    className="w-20 h-20 rounded-full overflow-hidden ring-2 ring-pink-200">
+                                                    <img
+                                                        src={friend.profile_image_url || '/images/defaultAvatar.jpg'}
+                                                        alt={friend.name}
+                                                        className="w-full h-full object-cover"
+                                                        onError={(e) => {
+                                                            e.target.src = '/images/defaultAvatar.jpg';
+                                                        }}
+                                                    />
+                                                </div>
+                                                <p className="mt-2 text-center text-sm truncate w-full">{friend.name}</p>
 
-                                            <button
-                                                onClick={() => handleRemoveFriend(friend.id)}
-                                                disabled={isRemoving}
-                                                className="absolute -top-2 -right-2 p-1.5 rounded-full bg-red-500 text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600 disabled:bg-gray-400"
-                                                title={t('cancel')}
-                                            >
-                                                <UserMinus size={16}/>
-                                            </button>
-                                        </div>
-                                    ))}
-                                </div>
+                                                <button
+                                                    onClick={() => handleRemoveFriend(friend.id)}
+                                                    disabled={isRemoving}
+                                                    className="absolute -top-2 -right-2 p-1.5 rounded-full bg-red-500 text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600 disabled:bg-gray-400"
+                                                    title={t('cancel')}
+                                                >
+                                                    <UserMinus size={16}/>
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="text-center py-12 text-gray-500">
+                                        {t('noFriendsFound')}
+                                    </div>
+                                )}
                             </div>
                         </div>
                     )}

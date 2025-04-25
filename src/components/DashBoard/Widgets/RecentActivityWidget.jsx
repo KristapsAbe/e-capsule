@@ -13,7 +13,7 @@ const RecentActivityWidget = ({ onViewAll, onClose }) => {
         const fetchActivities = async () => {
             try {
                 setLoading(true);
-                const response = await axios.get('http://127.0.0.1:8000/api/activities/comments');
+                const response = await axios.get('https://www.e-capsule.digital/backend/public/api/activities/comments');
                 setActivities(response.data.activities);
                 setLoading(false);
             } catch (err) {
@@ -60,20 +60,26 @@ const RecentActivityWidget = ({ onViewAll, onClose }) => {
     };
 
     return (
-        <div className='bg-accent/10 backdrop-blur-lg p-5 rounded-2xl shadow-secondary h-full flex flex-col border border-accent/30 relative overflow-hidden'>
+        <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}
+             className='bg-accent/10 backdrop-blur-lg p-5 rounded-2xl shadow-secondary border border-accent/30 relative overflow-hidden'>
             <div className="absolute bottom-0 left-0 w-24 h-24 bg-accent/20 rounded-full blur-2xl -ml-5 -mb-5"></div>
 
-            <div className='flex items-center mb-4'>
+            <div style={{ flexShrink: 0 }} className='flex items-center mb-4'>
                 <div className="w-1 h-6 bg-button rounded-full mr-2"></div>
                 <h3 className='text-text font-bold'>{t('recentActivity')}</h3>
                 <div className="flex gap-2 ml-auto">
+                    <button
+                        onClick={onClose}
+                        className='bg-background/40 w-6 h-6 rounded-full flex items-center justify-center backdrop-blur-sm hover:bg-background/60 transition-all'>
+                        <Icon name="x" className="text-white" />
+                    </button>
                     <button className='bg-background/40 w-6 h-6 rounded-full flex items-center justify-center backdrop-blur-sm hover:bg-background/60 transition-all'>
                         <Icon name="bell" className="text-white" />
                     </button>
                 </div>
             </div>
 
-            <div className='flex-grow'>
+            <div style={{ flexGrow: 1, overflowY: 'auto' }} className='timeline-scrollbar'>
                 {loading ? (
                     <div className="flex items-center justify-center h-full">
                         <div className="w-6 h-6 border-2 border-button border-t-transparent rounded-full animate-spin"></div>
@@ -109,6 +115,7 @@ const RecentActivityWidget = ({ onViewAll, onClose }) => {
             </div>
 
             <button
+                style={{ flexShrink: 0 }}
                 onClick={() => onViewAll(activities)}
                 className='text-button text-xs font-bold w-full text-center mt-4 py-2 border-t border-accent/20 hover:bg-background/20 rounded-lg transition-all'
             >

@@ -13,6 +13,7 @@ const AnimatedCapsule = ({ capsuleData }) => {
   const [isPlaying, setIsPlaying] = useState(true);
   const [transition, setTransition] = useState('zoom');
   const [progress, setProgress] = useState(0);
+  const [imageComments, setImageComments] = useState({});
 
   useEffect(() => {
     if (!capsuleData) {
@@ -23,6 +24,7 @@ const AnimatedCapsule = ({ capsuleData }) => {
     try {
       setLoading(true);
 
+      // Parse images array
       let parsedImages;
       if (typeof capsuleData.images === 'string') {
         parsedImages = JSON.parse(capsuleData.images);
@@ -30,14 +32,27 @@ const AnimatedCapsule = ({ capsuleData }) => {
         parsedImages = capsuleData.images;
       }
 
+      // Parse image comments
+      let parsedImageComments = {};
+      if (capsuleData.image_comments) {
+        if (typeof capsuleData.image_comments === 'string') {
+          parsedImageComments = JSON.parse(capsuleData.image_comments);
+        } else {
+          parsedImageComments = capsuleData.image_comments;
+        }
+      }
+
+      setImageComments(parsedImageComments);
+
       const transformedData = {
         id: capsuleData.id,
         title: capsuleData.title,
         description: capsuleData.description,
         privacy: capsuleData.privacy || 'private',
         images: parsedImages.map((img, index) => ({
-          src: img.includes('http') ? img : `http://127.0.0.1:8000/storage/${img}`,
-          caption: `Memory ${index + 1}`,
+          src: img.includes('http') ? img : `https://www.e-capsule.digital/backend/public/storage/${img}`,
+          path: img, // Keep the original path to match with comments
+          caption: parsedImageComments[img] || `Memory ${index + 1}`,
           date: new Date(capsuleData.created_at || Date.now()).toLocaleDateString(),
         })),
         time: {
@@ -62,6 +77,7 @@ const AnimatedCapsule = ({ capsuleData }) => {
         setStage(0);
       }
     } catch (err) {
+      console.error("Error processing capsule data:", err);
       setError('Failed to process capsule data');
     } finally {
       setLoading(false);
@@ -398,7 +414,7 @@ const AnimatedCapsule = ({ capsuleData }) => {
                         <Clock className="absolute bottom-16 left-1/2 transform -translate-x-1/2 w-6 h-6 text-text" />
 
                         <div className="absolute bottom-2 left-0 right-0 text-center px-4">
-                          <p className="text-text text-sm font-medium truncate">{processedCapsuleData?.title}</p>
+                          <p className="text-text text-sm font-medium truncate mt-8">{processedCapsuleData?.title}</p>
                         </div>
                       </motion.div>
                     </motion.div>
@@ -414,11 +430,13 @@ const AnimatedCapsule = ({ capsuleData }) => {
                                 {...getImageAnimation()}
                             >
                               <div className="absolute inset-0 bg-gradient-to-b from-black/20 to-black/60" />
-                              <img
-                                  src={currentImage.src || '/api/placeholder/800/600'}
-                                  alt={currentImage.caption}
-                                  className="w-full h-full object-cover scale-110"
-                              />
+                              <div className="w-full h-full flex items-center justify-center overflow-hidden">
+                                <img
+                                    src={currentImage.src || '/api/placeholder/800/600'}
+                                    alt={currentImage.caption}
+                                    className="max-w-full max-h-full object-contain"
+                                />
+                              </div>
 
                               <motion.div
                                   className="absolute bottom-20 left-0 right-0 p-8 text-center"
@@ -426,7 +444,9 @@ const AnimatedCapsule = ({ capsuleData }) => {
                                   animate={{ y: 0, opacity: 1 }}
                                   transition={{ delay: 0.5, duration: 1 }}
                               >
-                                <h2 className="text-white text-4xl font-bold mb-2">{currentImage.caption}</h2>
+                                <h2 className="text-white text-4xl font-bold mb-2">
+                                  {currentImage.caption || `Memory ${activeIndex + 1}`}
+                                </h2>
                                 <p className="text-white/80 text-xl">{currentImage.date}</p>
                               </motion.div>
                             </motion.div>

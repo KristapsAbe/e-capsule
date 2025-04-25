@@ -19,7 +19,7 @@ const CommentModal = ({ isOpen, onClose, capsule }) => {
             const currentUserId = parseInt(localStorage.getItem('user_id'));
             const token = localStorage.getItem('access_token');
 
-            await axios.post('http://127.0.0.1:8000/api/capsule-comments', {
+            await axios.post('https://www.e-capsule.digital/backend/public/api/capsule-comments', {
                 capsule_id: capsule.id,
                 user_id: currentUserId,
                 comment: comment

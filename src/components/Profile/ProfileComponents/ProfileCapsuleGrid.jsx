@@ -81,7 +81,7 @@ const ContentPreview = ({ capsule, styles, t }) => {
   const hasMessages = capsule.message && capsule.message.trim().length > 0;
   const [imageError, setImageError] = useState(false);
 
-  const imageBaseUrl = 'http://127.0.0.1:8000/storage/';
+  const imageBaseUrl = 'https://www.e-capsule.digital/backend/public/storage/';
 
   return (
       <div className="relative h-48 mb-4 overflow-hidden">

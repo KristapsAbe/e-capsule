@@ -123,7 +123,7 @@ function Modal({ show, onClose, onSave, initialData }) {
   const fetchUserProfile = async () => {
     try {
       const token = localStorage.getItem('access_token');
-      const response = await fetch('http://127.0.0.1:8000/api/get-profile', {
+      const response = await fetch('https://www.e-capsule.digital/backend/public/api/get-profile', {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -149,7 +149,7 @@ function Modal({ show, onClose, onSave, initialData }) {
       setInitialFormData(initialData);
 
       if (data.user.profileImage) {
-        setImagePreview(`http://127.0.0.1:8000/storage/${data.user.profileImage}`);
+        setImagePreview(`https://www.e-capsule.digital/backend/public/storage/${data.user.profileImage}`);
       }
     } catch (error) {
       setErrors(prev => ({ ...prev, general: t('failedToLoadProfile') }));
@@ -224,7 +224,7 @@ function Modal({ show, onClose, onSave, initialData }) {
 
     try {
       const token = localStorage.getItem('access_token');
-      const response = await fetch('http://127.0.0.1:8000/api/update-profile', {
+      const response = await fetch('https://www.e-capsule.digital/backend/public/api/update-profile', {
         method: 'POST',
         body: formDataToSend,
         headers: {
@@ -269,214 +269,209 @@ function Modal({ show, onClose, onSave, initialData }) {
   if (!show) return null;
 
   return (
-      <div className="fixed inset-0 bg-background/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-        <Card className="w-full max-w-3xl bg-background p-6 rounded-2xl shadow-custom">
-          <div className="relative mb-8">
-            <h2 className="text-2xl font-semibold text-center text-text">
-              {t('editYourProfile')}
-            </h2>
-            <button
-                onClick={onClose}
-                className="absolute right-0 top-0 text-primary/70 hover:text-primary transition-colors"
-            >
-              <X className="w-6 h-6" />
-            </button>
-          </div>
+      <div className="fixed inset-0 bg-background/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-y-auto">
+        <div className="my-8 w-full max-w-3xl">
+          <Card className="bg-background p-6 rounded-2xl shadow-custom">
+            <div className="relative mb-8">
+              <h2 className="text-2xl font-semibold text-center text-text">
+                {t('editYourProfile')}
+              </h2>
+              <button
+                  onClick={onClose}
+                  className="absolute right-0 top-0 text-primary/70 hover:text-primary transition-colors"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
 
-          {successMessage && (
-              <div className="mb-4 p-3 bg-accent/20 text-text rounded-lg text-center">
-                {successMessage}
-              </div>
-          )}
-
-          {errors.general && (
-              <div className="mb-4 p-3 bg-red-500/20 text-red-300 rounded-lg text-center">
-                {errors.general}
-              </div>
-          )}
-
-          {isConfirming ? (
-              <form onSubmit={(e) => { e.preventDefault(); handleConfirm(); }} className="space-y-6">
-                <Input
-                    icon={Lock}
-                    type="password"
-                    name="confirmPassword"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    placeholder={t('enterCurrentPasswordToConfirm')}
-                />
-                <div className="flex justify-end space-x-4">
-                  <button
-                      type="button"
-                      onClick={() => setIsConfirming(false)}
-                      className="px-6 py-2 rounded-lg border-2 border-btnOutline text-primary
-                         hover:bg-secondary/10 transition-all duration-300"
-                  >
-                    {t('back')}
-                  </button>
-                  <button
-                      type="submit"
-                      className="px-6 py-2 rounded-lg bg-button
-                         hover:bg-accent text-background transition-all duration-300"
-                  >
-                    {t('confirmChanges')}
-                  </button>
+            {successMessage && (
+                <div className="mb-4 p-3 bg-accent/20 text-text rounded-lg text-center">
+                  {successMessage}
                 </div>
-              </form>
-          ) : (
-              <form onSubmit={handleSubmit} className="space-y-8">
-                <div className="flex justify-center mb-8">
-                  <div className="relative">
-                    <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-secondary/30">
-                      {imagePreview ? (
-                          <img
-                              src={imagePreview}
-                              alt={t('profile')}
-                              className="w-full h-full object-cover"
-                          />
-                      ) : (
-                          <div className="w-full h-full bg-secondary flex items-center justify-center">
-                            <User className="w-16 h-16 text-primary/50" />
-                          </div>
-                      )}
-                      {validationErrors.image && (
-                          <p className="absolute -bottom-6 text-sm text-red-500">
-                            {validationErrors.image}
-                          </p>
-                      )}
-                    </div>
-                    <label className="absolute bottom-0 right-0 w-10 h-10 bg-button rounded-full
-                                flex items-center justify-center cursor-pointer
-                                hover:bg-accent transition-colors duration-300">
-                      <Camera className="w-5 h-5 text-background" />
-                      <input
-                          type="file"
-                          accept="image/*"
-                          onChange={handleChange}
-                          className="hidden"
-                      />
-                    </label>
-                  </div>
-                </div>
+            )}
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {errors.general && (
+                <div className="mb-4 p-3 bg-red-500/20 text-red-300 rounded-lg text-center">
+                  {errors.general}
+                </div>
+            )}
+
+            {isConfirming ? (
+                <form onSubmit={(e) => { e.preventDefault(); handleConfirm(); }} className="space-y-6">
                   <Input
-                      ref={firstNameRef}
-                      icon={User}
-                      type="text"
-                      name="firstName"
-                      value={formData.firstName}
-                      onChange={handleChange}
-                      onBlur={() => handleBlur('firstName')}
-                      placeholder={t('firstName')}
-                      error={touchedFields.firstName ? validationErrors.firstName : ''}
+                      icon={Lock}
+                      type="password"
+                      name="confirmPassword"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      placeholder={t('enterCurrentPasswordToConfirm')}
                   />
-                  <Input
-                      ref={lastNameRef}
-                      icon={User}
-                      type="text"
-                      name="lastName"
-                      value={formData.lastName}
-                      onChange={handleChange}
-                      onBlur={() => handleBlur('lastName')}
-                      placeholder={t('lastName')}
-                      error={touchedFields.lastName ? validationErrors.lastName : ''}
-                  />
-                </div>
-
-                <Input
-                    ref={emailRef}
-                    icon={Mail}
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    onBlur={() => handleBlur('email')}
-                    placeholder={t('emailAddress')}
-                    error={touchedFields.email ? (validationErrors.email || serverErrors.email) : ''}
-                />
-
-                <div className="relative">
-                  <PencilLine className="absolute left-3 top-3 w-5 h-5 text-accent" />
-                  <textarea
-                      ref={bioRef}
-                      name="bio"
-                      value={formData.bio}
-                      onChange={handleChange}
-                      onBlur={() => handleBlur('bio')}
-                      placeholder={t('tellUsAboutYourself')}
-                      className={`w-full h-32 bg-background text-text rounded-lg border-2 
-                         px-10 py-2 focus:outline-none transition-all duration-300 
-                         placeholder:text-primary/50 resize-none ${
-                          validationErrors.bio
-                              ? 'border-red-500 focus:border-red-600'
-                              : 'border-secondary/30 focus:border-accent'
-                      }`}
-                  />
-                  {touchedFields.bio && validationErrors.bio && (
-                      <p className="mt-1 text-sm text-red-500">{validationErrors.bio}</p>
-                  )}
-                </div>
-
-                <div className="space-y-4">
-                  <div className="relative">
-                    <PasswordInput
-                        ref={newPasswordRef}
-                        name="newPassword"
-                        value={formData.newPassword}
-                        onChange={handleChange}
-                        onBlur={() => handleBlur('newPassword')}
-                        placeholder={t('newPassword')}
-                        error={touchedFields.newPassword ? validationErrors.newPassword : ''}
-                    />
+                  <div className="flex justify-end space-x-4">
                     <button
                         type="button"
-                        onClick={() => setIsPasswordVisible(!isPasswordVisible)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-accent/70
-                           hover:text-accent transition-colors"
+                        onClick={() => setIsConfirming(false)}
+                        className="px-6 py-2 rounded-lg border-2 border-btnOutline text-primary
+                         hover:bg-secondary/10 transition-all duration-300"
                     >
+                      {t('back')}
+                    </button>
+                    <button
+                        type="submit"
+                        className="px-6 py-2 rounded-lg bg-button
+                         hover:bg-accent text-background transition-all duration-300"
+                    >
+                      {t('confirmChanges')}
                     </button>
                   </div>
-
-                  <PasswordInput
-                      ref={confirmNewPasswordRef}
-                      name="confirmNewPassword"
-                      value={formData.confirmNewPassword}
-                      onChange={handleChange}
-                      onBlur={() => handleBlur('confirmNewPassword')}
-                      placeholder={t('confirmNewPassword')}
-                      error={touchedFields.confirmNewPassword ? validationErrors.confirmNewPassword : ''}
-                  />
-                </div>
-
-                {errors.password && (
-                    <div className="text-red-400 text-sm mt-2">
-                      {errors.password}
+                </form>
+            ) : (
+                <form onSubmit={handleSubmit} className="space-y-8">
+                  <div className="flex justify-center mb-8">
+                    <div className="relative">
+                      <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-secondary/30">
+                        {imagePreview ? (
+                            <img
+                                src={imagePreview}
+                                alt={t('profile')}
+                                className="w-full h-full object-cover"
+                            />
+                        ) : (
+                            <div className="w-full h-full bg-secondary flex items-center justify-center">
+                              <User className="w-16 h-16 text-primary/50" />
+                            </div>
+                        )}
+                        {validationErrors.image && (
+                            <p className="absolute -bottom-6 text-sm text-red-500">
+                              {validationErrors.image}
+                            </p>
+                        )}
+                      </div>
+                      <label className="absolute bottom-0 right-0 w-10 h-10 bg-button rounded-full
+                                flex items-center justify-center cursor-pointer
+                                hover:bg-accent transition-colors duration-300">
+                        <Camera className="w-5 h-5 text-background" />
+                        <input
+                            type="file"
+                            accept="image/*"
+                            onChange={handleChange}
+                            className="hidden"
+                        />
+                      </label>
                     </div>
-                )}
+                  </div>
 
-                <div className="flex justify-end space-x-4">
-                  <button
-                      type="button"
-                      onClick={onClose}
-                      className="px-6 py-2 rounded-lg border-2 border-btnOutline text-primary
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <Input
+                        ref={firstNameRef}
+                        icon={User}
+                        type="text"
+                        name="firstName"
+                        value={formData.firstName}
+                        onChange={handleChange}
+                        onBlur={() => handleBlur('firstName')}
+                        placeholder={t('firstName')}
+                        error={touchedFields.firstName ? validationErrors.firstName : ''}
+                    />
+                    <Input
+                        ref={lastNameRef}
+                        icon={User}
+                        type="text"
+                        name="lastName"
+                        value={formData.lastName}
+                        onChange={handleChange}
+                        onBlur={() => handleBlur('lastName')}
+                        placeholder={t('lastName')}
+                        error={touchedFields.lastName ? validationErrors.lastName : ''}
+                    />
+                  </div>
+
+                  <Input
+                      ref={emailRef}
+                      icon={Mail}
+                      type="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      onBlur={() => handleBlur('email')}
+                      placeholder={t('emailAddress')}
+                      error={touchedFields.email ? (validationErrors.email || serverErrors.email) : ''}
+                  />
+
+                  <div className="relative">
+                    <PencilLine className="absolute left-3 top-3 w-5 h-5 text-accent" />
+                    <textarea
+                        ref={bioRef}
+                        name="bio"
+                        value={formData.bio}
+                        onChange={handleChange}
+                        onBlur={() => handleBlur('bio')}
+                        placeholder={t('tellUsAboutYourself')}
+                        className={`w-full h-32 bg-background text-text rounded-lg border-2 
+                         px-10 py-2 focus:outline-none transition-all duration-300 
+                         placeholder:text-primary/50 resize-none ${
+                            validationErrors.bio
+                                ? 'border-red-500 focus:border-red-600'
+                                : 'border-secondary/30 focus:border-accent'
+                        }`}
+                    />
+                    {touchedFields.bio && validationErrors.bio && (
+                        <p className="mt-1 text-sm text-red-500">{validationErrors.bio}</p>
+                    )}
+                  </div>
+
+                  <div className="space-y-4">
+                    <div className="relative">
+                      <PasswordInput
+                          ref={newPasswordRef}
+                          name="newPassword"
+                          value={formData.newPassword}
+                          onChange={handleChange}
+                          onBlur={() => handleBlur('newPassword')}
+                          placeholder={t('newPassword')}
+                          error={touchedFields.newPassword ? validationErrors.newPassword : ''}
+                      />
+                    </div>
+
+                    <PasswordInput
+                        ref={confirmNewPasswordRef}
+                        name="confirmNewPassword"
+                        value={formData.confirmNewPassword}
+                        onChange={handleChange}
+                        onBlur={() => handleBlur('confirmNewPassword')}
+                        placeholder={t('confirmNewPassword')}
+                        error={touchedFields.confirmNewPassword ? validationErrors.confirmNewPassword : ''}
+                    />
+                  </div>
+
+                  {errors.password && (
+                      <div className="text-red-400 text-sm mt-2">
+                        {errors.password}
+                      </div>
+                  )}
+
+                  <div className="flex justify-end space-x-4 pt-4">
+                    <button
+                        type="button"
+                        onClick={onClose}
+                        className="px-6 py-2 rounded-lg border-2 border-btnOutline text-primary
                          hover:bg-secondary/10 transition-all duration-300"
-                  >
-                    {t('cancel')}
-                  </button>
-                  <button
-                      type="submit"
-                      disabled={!hasChanges}
-                      className={`px-6 py-2 rounded-lg bg-button
+                    >
+                      {t('cancel')}
+                    </button>
+                    <button
+                        type="submit"
+                        disabled={!hasChanges}
+                        className={`px-6 py-2 rounded-lg bg-button
                          hover:bg-accent text-background transition-all duration-300
                          ${!hasChanges ? 'opacity-50 cursor-not-allowed' : ''}`}
-                  >
-                    {t('saveChanges')}
-                  </button>
-                </div>
-              </form>
-          )}
-        </Card>
+                    >
+                      {t('saveChanges')}
+                    </button>
+                  </div>
+                </form>
+            )}
+          </Card>
+        </div>
       </div>
   );
 }

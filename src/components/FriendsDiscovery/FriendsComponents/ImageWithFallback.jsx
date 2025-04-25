@@ -4,7 +4,7 @@ const ImageWithFallback = memo(({ src, alt, onLoad, onError, className }) => {
     const [imgSrc, setImgSrc] = useState(src);
 
     const handleError = () => {
-        setImgSrc('/images/DefaultAvatar.jpg');
+        setImgSrc(`${process.env.PUBLIC_URL}/images/defaultAvatar.jpg`);
         onError?.();
     };
 

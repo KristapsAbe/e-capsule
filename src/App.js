@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import DashBoard from './components/DashBoard/DashBoard';
 import Header from './components/Header';
 import Login from './pages/Login';
@@ -44,7 +44,7 @@ function AppContent() {
   const fetchFriendRequestCount = useCallback(async () => {
     try {
       const token = localStorage.getItem('access_token');
-      const response = await fetch('http://127.0.0.1:8000/api/friends/requests', {
+      const response = await fetch('https://www.e-capsule.digital/backend/public/api/friends/requests', {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Accept': 'application/json',
@@ -91,6 +91,7 @@ function AppContent() {
         )}
 
         <Routes>
+          <Route path="/" element={<Navigate to="/register" replace />} />
           <Route path="/dashboard" element={<DashBoard />} />
           <Route path="/login" element={<Login />} />
           <Route path="/home" element={<Home />} />

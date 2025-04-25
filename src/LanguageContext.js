@@ -38,7 +38,7 @@ const translations = {
         failedToFetchFriends: "Failed to fetch friends data",
         authTokenNotFound: "Authentication token not found",
         noFriendsFound: "No friends found. Start by adding some friends!",
-        inviteFriends: "Invite Friends",
+        inviteFriends: "Add Friends",
         capsules: "capsules",
         commented: 'commented on',
         created: 'created',

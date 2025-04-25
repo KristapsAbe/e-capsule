@@ -108,24 +108,22 @@ function Header({ notificationCount, onNotificationClick }) {
                   onClick={onNotificationClick}
                   className="p-1.5 relative font-lexend xl:hidden"
               >
-                <Bell size={20} color="#FFFFFF" />
+                <Bell size={20} color="#FFFFFF"/>
                 {notificationCount > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                    <span
+                        className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
                   {notificationCount}
                 </span>
                 )}
               </button>
-              <button
-                  onClick={toggleMenu}
-                  className="text-text p-1.5"
-                  data-menu-toggle
-              >
-                {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+              <button onClick={toggleMenu} className="text-text p-1.5 xl:hidden" data-menu-toggle>
+                {isMenuOpen ? <X size={24}/> : <Menu size={24}/>}
               </button>
             </div>
 
             <nav className="hidden xl:flex items-center justify-center flex-grow px-4">
-              <div className="flex flex-wrap justify-center space-x-2 md:space-x-4 lg:space-x-6 text-sm md:text-base font-lexend">
+              <div
+                  className="flex flex-wrap justify-center space-x-2 md:space-x-4 lg:space-x-6 text-sm md:text-base font-lexend">
                 <NavItem href="/Home" translationKey="home" />
                 <NavItem href="/Dashboard" translationKey="dashboard" />
                 <NavItem href="/Profile" translationKey="profile" />

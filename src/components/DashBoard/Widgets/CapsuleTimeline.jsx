@@ -32,7 +32,7 @@ const CapsuleTimeline = () => {
             const token = localStorage.getItem('access_token');
             const currentUserId = parseInt(localStorage.getItem('user_id'));
 
-            const response = await fetch('http://127.0.0.1:8000/api/capsules', {
+            const response = await fetch('https://www.e-capsule.digital/backend/public/api/capsules', {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
@@ -119,7 +119,7 @@ const CapsuleTimeline = () => {
     }
 
     return (
-        <div className="w-full h-full bg-accent/10 backdrop-blur-lg rounded-2xl p-3 md:p-6 flex flex-col border border-accent/30 shadow-secondary relative timeline-scrollbar overflow-hidden">
+        <div className="w-full h-full h-auto overflow-auto bg-accent/10 backdrop-blur-lg rounded-2xl p-3 md:p-6 flex flex-col border border-accent/30 shadow-secondary relative timeline-scrollbar overflow-hidden">
             <div className="absolute top-0 right-0 w-40 h-40 bg-secondary/20 rounded-full blur-3xl -mr-10 -mt-10"></div>
             <div className="absolute bottom-0 left-0 w-32 h-32 bg-accent/20 rounded-full blur-3xl -ml-10 -mb-10"></div>
 

@@ -28,7 +28,7 @@ const NotificationSidebar = ({ isOpen, onClose, onUpdateCount, fetchFriendReques
         return;
       }
 
-      const response = await fetch('http://127.0.0.1:8000/api/friends/requests', {
+      const response = await fetch('https://www.e-capsule.digital/backend/public/api/friends/requests', {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Accept': 'application/json',
@@ -55,7 +55,7 @@ const NotificationSidebar = ({ isOpen, onClose, onUpdateCount, fetchFriendReques
         return;
       }
 
-      const response = await fetch('http://127.0.0.1:8000/api/capsules/shared', {
+      const response = await fetch('https://www.e-capsule.digital/backend/public/api/capsules/shared', {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Accept': 'application/json',
@@ -88,7 +88,7 @@ const NotificationSidebar = ({ isOpen, onClose, onUpdateCount, fetchFriendReques
       const token = localStorage.getItem('access_token');
       if (!token) return;
 
-      const response = await fetch(`http://127.0.0.1:8000/api/friends/request/${requestId}/${action}`, {
+      const response = await fetch(`https://www.e-capsule.digital/backend/public/api/friends/request/${requestId}/${action}`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -135,7 +135,7 @@ const NotificationSidebar = ({ isOpen, onClose, onUpdateCount, fetchFriendReques
         return;
       }
 
-      const response = await fetch(`http://127.0.0.1:8000/api/capsules/share/${shareId}/status`, {
+      const response = await fetch(`https://www.e-capsule.digital/backend/public/api/capsules/share/${shareId}/status`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,

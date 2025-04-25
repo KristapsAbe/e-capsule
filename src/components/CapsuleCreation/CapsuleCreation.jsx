@@ -156,7 +156,7 @@ function CapsuleCreation() {
 
         try {
 
-            const response = await fetch('http://127.0.0.1:8000/api/capsule/create', {
+            const response = await fetch('https://www.e-capsule.digital/backend/public/api/capsule/create', {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
