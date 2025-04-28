@@ -1,18 +1,19 @@
-import React, {useState, useEffect} from 'react';
-import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
-import {faCheckCircle, faTrash, faComment, faExclamationCircle} from '@fortawesome/free-solid-svg-icons';
+import React, { useState, useEffect } from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faCheckCircle } from '@fortawesome/free-solid-svg-icons';
 import 'react-datepicker/dist/react-datepicker.css';
+import { useNavigate } from 'react-router-dom';
+import { useLanguage } from "../../LanguageContext";
+import { validateStep } from "../validations/CapsuleCreationValidation";
+import TitleAndDescription from './CapsuleCreationComponents/TitleAndDescription';
+import ImagesUpload from './CapsuleCreationComponents/ImagesUpload';
+import DateAndTime from './CapsuleCreationComponents/DateAndTime';
+import ImageAddons from './CapsuleCreationComponents/ImageAddons';
+import Vision from './CapsuleCreationComponents/Vision';
+import PrivacySettings from './CapsuleCreationComponents/PrivacySettings';
 import CapsuleDesignSelector from '../Profile/ProfileComponents/CapsuleDesignSelector';
 import CapsulePreview from './CapsuleCreationComponents/CapsulePreview';
 import CapsuleSharing from './CapsuleCreationComponents/CapsuleSharing';
-import {useNavigate} from 'react-router-dom';
-import CustomCalendar from './CapsuleCreationComponents/CustomCalendar'
-import { useLanguage } from "../../LanguageContext";
-import {
-    validateStep,
-    validateFile,
-    ALLOWED_FILE_TYPES,
-} from "../validations/CapsuleCreationValidation";
 
 function CapsuleCreation() {
     const { t } = useLanguage();
@@ -26,7 +27,8 @@ function CapsuleCreation() {
         t('capsuleDesign'),
         t('preview'),
         t('sharing')
-    ];    const [currentStep, setCurrentStep] = useState(0);
+    ];
+    const [currentStep, setCurrentStep] = useState(0);
     const [stepErrors, setStepErrors] = useState({});
     const navigate = useNavigate();
     const [formData, setFormData] = useState({
@@ -39,8 +41,6 @@ function CapsuleCreation() {
         design: 'default',
         sharedWith: []
     });
-    const [selectedImage, setSelectedImage] = useState(null);
-    const [imageComment, setImageComment] = useState('');
     const [attemptedNext, setAttemptedNext] = useState(false);
     const token = localStorage.getItem('access_token');
 
@@ -52,64 +52,15 @@ function CapsuleCreation() {
     }, [formData, currentStep, attemptedNext, t]);
 
     const handleInputChange = (e) => {
-        const {name, value} = e.target;
+        const { name, value } = e.target;
         setFormData(prevState => ({
             ...prevState,
             [name]: value
         }));
     };
 
-    const handleImageSelection = (e) => {
-        const files = Array.from(e.target.files);
-        const fileErrors = [];
-        const validFiles = [];
-
-        files.forEach(file => {
-            const error = validateFile(file, t);
-            if (error) {
-                fileErrors.push({file: file.name, error});
-            } else {
-                validFiles.push({file, comment: ''});
-            }
-        });
-
-        if (fileErrors.length > 0) {
-            setStepErrors({images: fileErrors.map(f => `${f.file}: ${f.error}`).join(', ')});
-            return;
-        }
-
-        setFormData(prevState => ({
-            ...prevState,
-            images: [...prevState.images, ...validFiles]
-        }));
-        setStepErrors({});
-    };
-
-    const removeImage = (index) => {
-        const updatedImages = formData.images.filter((_, i) => i !== index);
-        setFormData({...formData, images: updatedImages});
-    };
-
-    const selectImage = (index) => {
-        setSelectedImage(index);
-        setImageComment(formData.images[index].comment || '');
-    };
-
-    const saveImageComment = () => {
-        if (selectedImage !== null) {
-            setFormData(prevState => ({
-                ...prevState,
-                images: prevState.images.map((img, index) =>
-                    index === selectedImage ? {...img, comment: imageComment} : img
-                )
-            }));
-            setSelectedImage(null);
-            setImageComment('');
-        }
-    };
-
     const handleDateChange = (date) => {
-        setFormData({...formData, time: date});
+        setFormData({ ...formData, time: date });
     };
 
     const handleNextStep = () => {
@@ -155,7 +106,6 @@ function CapsuleCreation() {
         capsuleData.append('design', formData.design);
 
         try {
-
             const response = await fetch('https://www.e-capsule.digital/backend/public/api/capsule/create', {
                 method: 'POST',
                 headers: {
@@ -165,39 +115,150 @@ function CapsuleCreation() {
             });
 
             if (!response.ok) {
-                const errorData = await response.json().catch(e => ({message: 'Could not parse error response'}));
+                const errorData = await response.json().catch(e => ({ message: 'Could not parse error response' }));
+                throw new Error(errorData.message || 'Failed to create capsule');
             }
             navigate('/profile');
         } catch (error) {
-            setStepErrors({submit: 'Failed to create capsule. Please try again.'});
+            setStepErrors({ submit: 'Failed to create capsule. Please try again.' });
         }
     };
 
-    const renderError = (error) => {
-        if (!error) return null;
-        return (
-            <div className="text-red-500 text-sm mt-2 flex items-center justify-center">
-                <FontAwesomeIcon icon={faExclamationCircle} className="mr-2"/>
-                <span>{error}</span>
-            </div>
-        );
+    const updateFormData = (newData) => {
+        setFormData(prevState => ({
+            ...prevState,
+            ...newData
+        }));
     };
 
-    return (<div className='min-h-screen bg-background flex justify-center items-center p-2 sm:p-4 overflow-auto'>
-        <div
-            className='w-full max-w-6xl min-h-[600px] h-auto lg:h-[80vh] flex flex-col lg:flex-row bg-background rounded-xl shadow-custom'>
-            <div
-                className='hidden lg:block lg:w-4/12 h-full bg-transparent lg:border-r-accent lg:border-r-4 p-2 sm:p-4'>
+    const renderStep = () => {
+        switch (currentStep) {
+            case 0:
+                return (
+                    <TitleAndDescription
+                        formData={formData}
+                        onChange={handleInputChange}
+                        errors={stepErrors}
+                    />
+                );
+            case 1:
+                return (
+                    <ImagesUpload
+                        formData={formData}
+                        updateFormData={updateFormData}
+                        errors={stepErrors}
+                        setStepErrors={setStepErrors}
+                    />
+                );
+            case 2:
+                return (
+                    <DateAndTime
+                        selectedDate={formData.time}
+                        onDateChange={handleDateChange}
+                        errors={stepErrors}
+                    />
+                );
+            case 3:
+                return (
+                    <ImageAddons
+                        images={formData.images}
+                        updateFormData={updateFormData}
+                    />
+                );
+            case 4:
+                return (
+                    <Vision
+                        vision={formData.vision}
+                        onChange={handleInputChange}
+                        errors={stepErrors}
+                    />
+                );
+            case 5:
+                return (
+                    <PrivacySettings
+                        privacy={formData.privacy}
+                        onChange={handleInputChange}
+                        errors={stepErrors}
+                    />
+                );
+            case 6:
+                return (
+                    <div className="h-full flex flex-col">
+                        <div className="flex-1 overflow-hidden">
+                            <CapsuleDesignSelector
+                                value={formData.design}
+                                onChange={handleInputChange}
+                                error={stepErrors.design}
+                            />
+                            {stepErrors.design && (
+                                <div className="text-red-500 text-sm mt-2 flex items-center justify-center">
+                                    {stepErrors.design}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                );
+            case 7:
+                return <CapsulePreview formData={formData} />;
+            case 8:
+                return (
+                    <>
+                        <CapsuleSharing
+                            onShareSelectionChange={(selectedFriends) => updateFormData({ sharedWith: selectedFriends })}
+                        />
+                        {stepErrors.submit && (
+                            <div className="text-red-500 text-sm mt-2 flex items-center justify-center">
+                                {stepErrors.submit}
+                            </div>
+                        )}
+                    </>
+                );
+            default:
+                return null;
+        }
+    };
+
+    return (
+        <div className='min-h-screen bg-background flex justify-center items-center p-2 sm:p-4 overflow-auto'>
+            <div className='w-full max-w-6xl min-h-[600px] h-auto lg:h-[80vh] flex flex-col lg:flex-row bg-background rounded-xl shadow-custom'>
+                <StepsSidebar
+                    steps={steps}
+                    currentStep={currentStep}
+                />
+
+                <div className='w-full lg:w-8/12 h-auto lg:h-full bg-transparent font-lexend text-center relative p-2 sm:p-4 lg:p-6'>
+                    <h1 className='font-extrabold text-text pt-2 lg:pt-12 text-xl sm:text-2xl lg:text-3xl mb-4 sm:mb-8'>
+                        {steps[currentStep]}
+                    </h1>
+                    <div className='mb-16'>
+                        {renderStep()}
+                    </div>
+
+                    <NavigationButtons
+                        currentStep={currentStep}
+                        totalSteps={steps.length}
+                        onPrev={handlePrevStep}
+                        onNext={handleNextStep}
+                        onFinish={createCapsule}
+                        t={t}
+                    />
+                </div>
+            </div>
+        </div>
+    );
+}
+
+const StepsSidebar = ({ steps, currentStep }) => {
+    return (
+        <>
+            <div className='hidden lg:block lg:w-4/12 h-full bg-transparent lg:border-r-accent lg:border-r-4 p-2 sm:p-4'>
                 <h1 className='text-center flex text-[#FFD4F1] justify-center pt-12 text-4xl font-black font-lexend'>
                     E-CAPSULE
                 </h1>
-                <div
-                    className='flex flex-col justify-center text-left font-lexend text-text font-regular text-[20px] gap-y-4 m-4 mt-20'>
+                <div className='flex flex-col justify-center text-left font-lexend text-text font-regular text-[20px] gap-y-4 m-4 mt-20'>
                     {steps.map((step, index) => (
                         <div key={index} className="flex items-center">
-                            <p
-                                className={`flex-grow ${currentStep === index ? 'font-bold' : 'opacity-70'}`}
-                            >
+                            <p className={`flex-grow ${currentStep === index ? 'font-bold' : 'opacity-70'}`}>
                                 {step}
                             </p>
                             {index < currentStep && (
@@ -216,268 +277,49 @@ function CapsuleCreation() {
                     E-CAPSULE
                 </h1>
                 <div className='flex items-center justify-center gap-1'>
-                    {steps.map((_, index) => (<div
-                        key={index}
-                        className={`h-1 rounded-full transition-all duration-200 ${index === currentStep ? 'w-4 bg-[#A3688F]' : 'w-1 bg-gray-300'}`}
-                    />))}
-                </div>
-            </div>
-
-            <div
-                className='w-full lg:w-8/12 h-auto lg:h-full bg-transparent font-lexend text-center relative p-2 sm:p-4 lg:p-6'>
-                <h1 className='font-extrabold text-text pt-2 lg:pt-12 text-xl sm:text-2xl lg:text-3xl mb-4 sm:mb-8'>
-                    {steps[currentStep]}
-                </h1>
-                <div className='mb-16'>
-                    {currentStep === 0 && (<>
-                        <p className='text-text font-regular text-lg sm:text-xl lg:text-2xl mt-2 sm:mt-4 pb-2 sm:pb-4'>
-                            {t('title') || 'TITLE'}
-                        </p>
-                        <input
-                            name="title"
-                            value={formData.title}
-                            onChange={handleInputChange}
-                            className={`mb-4 w-full max-w-md uppercase p-1.5 sm:p-2 shadow-secondary rounded-[100px] font-light font-lexend bg-background text-center text-text text-sm sm:text-base lg:text-xl focus:outline-none focus:ring-2 ${stepErrors.title ? 'border-red-500' : 'border-[#A3688F]'} border-2`}
-                        />
-                        {renderError(stepErrors.title)}
-
-                        <p className='text-text font-regular text-lg sm:text-xl lg:text-2xl pb-2 sm:pb-4'>
-                            {t('description') || 'DESCRIPTION'}
-                        </p>
-                        <textarea
-                            name="description"
-                            value={formData.description}
-                            onChange={handleInputChange}
-                            className={`mb-4 w-full max-w-md p-1.5 sm:p-2 resize-none h-24 sm:h-32 lg:h-[240px] shadow-secondary rounded-[10px] font-light font-lexend bg-background text-left text-text text-sm sm:text-base lg:text-lg focus:outline-none focus:ring-2 ${stepErrors.description ? 'border-red-500' : 'border-[#A3688F]'} border-2`}
-                        ></textarea>
-                        {renderError(stepErrors.description)}
-                    </>)}
-
-                    {currentStep === 1 && (<>
-                        <p className='text-text font-regular text-lg sm:text-xl lg:text-2xl mt-4 sm:mt-8 pb-2 sm:pb-4 uppercase'>
-                            {t('uploadImages') || 'Upload Images'}
-                        </p>
-                        <label
-                            htmlFor="images"
-                            className={`w-full max-w-xs mx-auto flex justify-center items-center p-1.5 sm:p-2 shadow-secondary rounded-[100px] font-light font-lexend bg-background text-center text-text text-sm sm:text-base lg:text-xl border-2 cursor-pointer hover:bg-[#A3688F] hover:text-white transition duration-300 ${stepErrors.images ? 'border-red-500' : 'border-[#A3688F]'}`}
-                        >
-                            {t('chooseImages') || 'Choose Images'}
-                        </label>
-                        <input
-                            id="images"
-                            type="file"
-                            name="images"
-                            multiple
-                            onChange={handleImageSelection}
-                            className='hidden'
-                            accept={Object.values(ALLOWED_FILE_TYPES).flat().join(',')}
-                        />
-                        {renderError(stepErrors.images)}
-
-                        <div className="mt-4 sm:mt-8 w-full max-w-md mx-auto">
-                            <table className="w-full text-left text-sm sm:text-base">
-                                <tbody>
-                                {formData.images.map((image, index) => (
-                                    <tr key={index} className="border-t border-[#A3688F] text-text">
-                                        <td className="p-1.5 sm:p-2">{image.file.name}</td>
-                                        <td className="p-1.5 sm:p-2">
-                                            <button
-                                                onClick={() => removeImage(index)}
-                                                className="text-red-500 hover:text-red-700"
-                                            >
-                                                <FontAwesomeIcon icon={faTrash}/>
-                                            </button>
-                                        </td>
-                                    </tr>))}
-                                </tbody>
-                            </table>
-                        </div>
-                    </>)}
-
-                    {currentStep === 2 && (<>
-                        <p className='text-text font-regular text-lg sm:text-xl mt-2 sm:mt-4 mb-2 sm:mb-4'>
-                            {t('setTimeDate') || 'Set Time and Date for Capsule Opening'}
-                        </p>
-                        <div className="flex flex-col items-center">
-                            <CustomCalendar
-                                selectedDate={formData.time}
-                                onDateChange={handleDateChange}
-                            />
-                            {renderError(stepErrors.time)}
-                        </div>
-                    </>)}
-
-                    {currentStep === 3 && (<>
+                    {steps.map((_, index) => (
                         <div
-                            className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-4 mt-4 sm:mt-8">
-                            {formData.images.map((image, index) => (<div
-                                key={index}
-                                className="relative group aspect-square w-full"
-                            >
-                                <div className="w-full h-full relative">
-                                    <img
-                                        src={URL.createObjectURL(image.file)}
-                                        alt={`Uploaded ${index}`}
-                                        className="absolute inset-0 w-full h-full object-cover rounded-lg shadow-lg cursor-pointer hover:opacity-90 transition-opacity duration-300"
-                                        onClick={() => selectImage(index)}
-                                    />
-                                    {image.comment && (<div
-                                        className="absolute bottom-2 right-2 text-green-500 bg-white bg-opacity-75 rounded-full p-1.5 sm:p-2 cursor-pointer hover:bg-opacity-100"
-                                        onClick={() => selectImage(index)}
-                                    >
-                                        <FontAwesomeIcon icon={faComment}
-                                                         className="text-sm sm:text-base"/>
-                                    </div>)}
-                                </div>
-                            </div>))}
-                        </div>
-
-                        {selectedImage !== null && (<div
-                            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-2 sm:p-4 z-50">
-                            <div
-                                className="bg-background rounded-lg p-3 sm:p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-                                <div className="flex justify-between items-center mb-2 sm:mb-4">
-                                    <h3 className="text-lg sm:text-xl font-bold text-text">
-                                        {t('addCommentToImage') || 'Add Comment to Image'}
-                                    </h3>
-                                    <button
-                                        onClick={() => {
-                                            setSelectedImage(null);
-                                            setImageComment('');
-                                        }}
-                                        className="text-text hover:text-[#A3688F]"
-                                    >
-                                        ✕
-                                    </button>
-                                </div>
-
-                                <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
-                                    <div className="w-full sm:w-1/2">
-                                        <div className="aspect-square w-full relative">
-                                            <img
-                                                src={URL.createObjectURL(formData.images[selectedImage].file)}
-                                                alt="Selected for comment"
-                                                className="absolute inset-0 w-full h-full object-cover rounded-lg shadow-lg"
-                                            />
-                                        </div>
-                                    </div>
-
-                                    <div className="w-full sm:w-1/2 flex flex-col">
-                                        <textarea
-                                            value={imageComment}
-                                            onChange={(e) => setImageComment(e.target.value)}
-                                            className="flex-grow p-2 sm:p-3 border rounded-lg border-[#A3688F] focus:outline-none focus:ring-2 focus:ring-[#A3688F] bg-background text-text resize-none mb-2 sm:mb-4 text-sm sm:text-base"
-                                            placeholder={t('addCommentHere') || "Add your comment here..."}
-                                            rows={6}
-                                        />
-
-                                        <div className="flex justify-end gap-2">
-                                            <button
-                                                onClick={() => {
-                                                    setSelectedImage(null);
-                                                    setImageComment('');
-                                                }}
-                                                className="px-3 sm:px-4 py-1.5 sm:py-2 rounded-full border border-[#A3688F] text-text hover:bg-[#A3688F] hover:text-white transition duration-300 text-sm sm:text-base"
-                                            >
-                                                {t('cancel') || 'Cancel'}
-                                            </button>
-                                            <button
-                                                onClick={saveImageComment}
-                                                className="px-3 sm:px-4 py-1.5 sm:py-2 bg-[#A3688F] text-white rounded-full hover:bg-[#8A4B6A] transition duration-300 text-sm sm:text-base"
-                                            >
-                                                {t('saveComment') || 'Save Comment'}
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>)}
-                    </>)}
-
-                    {currentStep === 4 && (<>
-                        <p className='text-text font-regular text-lg sm:text-xl lg:text-2xl pb-2 sm:pb-4'>
-                            {t('vision') || 'VISION'}
-                        </p>
-                        <textarea
-                            name="vision"
-                            value={formData.vision}
-                            onChange={handleInputChange}
-                            placeholder={t('shareThoughts') || "Share your thoughts, expectations, or considerations for this time capsule..."}
-                            className={`mb-4 w-full max-w-md p-1.5 sm:p-2 resize-none h-24 sm:h-32 lg:h-[240px] shadow-secondary rounded-[10px] font-light font-lexend bg-background text-left text-text text-sm sm:text-base lg:text-lg border-2 focus:outline-none focus:ring-2 ${stepErrors.vision ? 'border-red-500' : 'border-[#A3688F]'}`}
-                        ></textarea>
-                        {renderError(stepErrors.vision)}
-                    </>)}
-
-                    {currentStep === 5 && (<>
-                        <p className='text-text font-regular text-lg sm:text-xl lg:text-2xl pb-2 sm:pb-4'>
-                            {t('privacySettings') || 'PRIVACY SETTINGS'}
-                        </p>
-                        <select
-                            name="privacy"
-                            value={formData.privacy}
-                            onChange={handleInputChange}
-                            className={`mb-4 w-full max-w-md p-1.5 sm:p-2 shadow-secondary rounded-[100px] font-light font-lexend bg-background text-center text-text text-sm sm:text-base lg:text-xl border-2 focus:outline-none focus:ring-2 ${stepErrors.privacy ? 'border-red-500' : 'border-[#A3688F]'}`}
-                        >
-                            <option value="private">{t('private') || 'Private'}</option>
-                            <option value="friends">{t('friendsOnly') || 'Friends Only'}</option>
-                            <option value="public">{t('public') || 'Public'}</option>
-                        </select>
-                        {renderError(stepErrors.privacy)}
-                    </>)}
-
-                    {currentStep === 6 && (<div className="h-full flex flex-col">
-                        <div className="flex-1 overflow-hidden">
-                            <CapsuleDesignSelector
-                                value={formData.design}
-                                onChange={handleInputChange}
-                                error={stepErrors.design}
-                            />
-                            {renderError(stepErrors.design)}
-                        </div>
-                    </div>)}
-
-                    {currentStep === 7 && (<>
-                        <CapsulePreview formData={formData}/>
-                    </>)}
-
-                    {currentStep === 8 && (<>
-                        <CapsuleSharing
-                            onShareSelectionChange={(selectedFriends) => setFormData(prev => ({
-                                ...prev, sharedWith: selectedFriends
-                            }))}
+                            key={index}
+                            className={`h-1 rounded-full transition-all duration-200 ${index === currentStep ? 'w-4 bg-[#A3688F]' : 'w-1 bg-gray-300'}`}
                         />
-                        {renderError(stepErrors.submit)}
-                    </>)}
-                </div>
-
-                <div
-                    className="absolute bottom-2 sm:bottom-4 left-0 right-0 flex justify-center space-x-2 sm:space-x-4">
-                    {currentStep > 0 && (<button
-                        className="font-lexend text-text font-extralight text-base sm:text-lg tracking-widest relative group px-2 sm:px-4"
-                        onClick={handlePrevStep}
-                    >
-                        {t('previous') || 'Previous'}
-                        <span
-                            className="absolute left-0 right-0 bottom-[-5px] h-[2px] w-0 bg-[#A3688F] transition-all group-hover:w-full"></span>
-                    </button>)}
-                    {currentStep < steps.length - 1 && (<button
-                        className="font-lexend text-text font-extralight text-base sm:text-lg tracking-widest relative group px-2 sm:px-4"
-                        onClick={handleNextStep}
-                    >
-                        {t('next') || 'Next'}
-                        <span
-                            className="absolute left-0 right-0 bottom-[-5px] h-[2px] w-0 bg-[#A3688F] transition-all group-hover:w-full"></span>
-                    </button>)}
-                    {currentStep === steps.length - 1 && (<button
-                        className="font-lexend text-white font-bold text-base sm:text-lg tracking-widest relative group bg-[#A3688F] px-4 sm:px-6 py-1.5 sm:py-2 rounded-full hover:bg-[#8A4B6A] transition duration-300"
-                        onClick={createCapsule}
-                    >
-                        {t('saveCapsule') || 'Save Capsule'}
-                    </button>)}
+                    ))}
                 </div>
             </div>
+        </>
+    );
+};
+
+const NavigationButtons = ({ currentStep, totalSteps, onPrev, onNext, onFinish, t }) => {
+    return (
+        <div className="absolute bottom-2 sm:bottom-4 left-0 right-0 flex justify-center space-x-2 sm:space-x-4">
+            {currentStep > 0 && (
+                <button
+                    className="font-lexend text-text font-extralight text-base sm:text-lg tracking-widest relative group px-2 sm:px-4"
+                    onClick={onPrev}
+                >
+                    {t('previous') || 'Previous'}
+                    <span className="absolute left-0 right-0 bottom-[-5px] h-[2px] w-0 bg-[#A3688F] transition-all group-hover:w-full"></span>
+                </button>
+            )}
+            {currentStep < totalSteps - 1 && (
+                <button
+                    className="font-lexend text-text font-extralight text-base sm:text-lg tracking-widest relative group px-2 sm:px-4"
+                    onClick={onNext}
+                >
+                    {t('next') || 'Next'}
+                    <span className="absolute left-0 right-0 bottom-[-5px] h-[2px] w-0 bg-[#A3688F] transition-all group-hover:w-full"></span>
+                </button>
+            )}
+            {currentStep === totalSteps - 1 && (
+                <button
+                    className="font-lexend text-white font-bold text-base sm:text-lg tracking-widest relative group bg-[#A3688F] px-4 sm:px-6 py-1.5 sm:py-2 rounded-full hover:bg-[#8A4B6A] transition duration-300"
+                    onClick={onFinish}
+                >
+                    {t('saveCapsule') || 'Save Capsule'}
+                </button>
+            )}
         </div>
-    </div>);
-}
+    );
+};
 
 export default CapsuleCreation;

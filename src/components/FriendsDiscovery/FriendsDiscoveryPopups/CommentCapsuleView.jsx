@@ -3,8 +3,10 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTimes, faComment, faClock, faUser } from '@fortawesome/free-solid-svg-icons';
 import { MessageSquare } from 'lucide-react';
 import axios from 'axios';
+import { useLanguage } from "../../../LanguageContext";
 
 const CommentCapsuleView = ({ isOpen, onClose, capsule }) => {
+    const { t } = useLanguage();
     const [comments, setComments] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
@@ -32,7 +34,7 @@ const CommentCapsuleView = ({ isOpen, onClose, capsule }) => {
 
             setComments(response.data.comments);
         } catch (err) {
-            setError('Unable to load comments. Please try again later.');
+            setError(t('failedToLoadActivity'));
         } finally {
             setLoading(false);
         }
@@ -67,7 +69,7 @@ const CommentCapsuleView = ({ isOpen, onClose, capsule }) => {
                     <div className="flex items-center">
                         <MessageSquare size={18} style={{ color: styles.accent }} className="mr-2" />
                         <h3 className="text-lg font-medium text-text">
-                            Comments on "{capsule.title}"
+                            {t('viewComments')} "{capsule.title}"
                         </h3>
                     </div>
                     <button
@@ -110,7 +112,7 @@ const CommentCapsuleView = ({ isOpen, onClose, capsule }) => {
                                             <FontAwesomeIcon icon={faUser} className="text-text/70" />
                                         </div>
                                     )}
-                                    <div className="flex-1 min-w-0"> {/* Added min-w-0 to enable text wrapping */}
+                                    <div className="flex-1 min-w-0">
                                         <div className="flex justify-between items-center mb-1">
                                             <span className="font-medium text-text truncate max-w-[120px]">{comment.user.name}</span>
                                             <div className="text-xs text-text/50 flex items-center shrink-0">
@@ -128,12 +130,12 @@ const CommentCapsuleView = ({ isOpen, onClose, capsule }) => {
                     ) : (
                         <div className="text-center py-8 text-text/70">
                             <FontAwesomeIcon icon={faComment} className="text-3xl mb-3 opacity-30" />
-                            <p>No comments yet</p>
+                            <p>{t('noRecentActivity')}</p>
                             <button
                                 onClick={onClose}
                                 className="mt-3 px-4 py-2 rounded-lg bg-button text-white text-sm hover:bg-button/90 transition"
                             >
-                                Be the first to comment
+                                {t('addComment')}
                             </button>
                         </div>
                     )}

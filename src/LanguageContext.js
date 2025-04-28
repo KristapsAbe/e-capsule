@@ -256,6 +256,10 @@ const translations = {
         status_pending: 'Pending',
         status_accepted: 'Accepted',
         status_declined: 'Declined',
+        postComment: 'Post Comment',
+        commentingOn: 'Commenting on',
+        submitting: 'Submitting...',
+        failedToSubmitComment: 'Failed to submit comment',
     },
     LAT: {
         home: 'Sākums',
@@ -498,6 +502,10 @@ const translations = {
         status_pending: 'Gaida',
         status_accepted: 'Pieņemts',
         status_declined: 'Noraidīts',
+        postComment: 'Publicēt Komentāru',
+        commentingOn: 'Komentē zem',
+        submitting: 'Nosūta...',
+        failedToSubmitComment: 'Neizdevās nosūtīt komentāru',
     }
 };
 

@@ -2,8 +2,10 @@ import React, { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
 import axios from 'axios';
+import { useLanguage } from "../../../LanguageContext";
 
 const CommentModal = ({ isOpen, onClose, capsule }) => {
+    const { t } = useLanguage();
     const [comment, setComment] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState(null);
@@ -32,7 +34,7 @@ const CommentModal = ({ isOpen, onClose, capsule }) => {
             setComment('');
             onClose();
         } catch (err) {
-            setError(err.response?.data?.message || 'Failed to submit comment');
+            setError(err.response?.data?.message || t('failedToSubmitComment'));
         } finally {
             setIsSubmitting(false);
         }
@@ -51,7 +53,7 @@ const CommentModal = ({ isOpen, onClose, capsule }) => {
             >
                 <div className="p-4 border-b border-white/10">
                     <div className="flex justify-between items-center">
-                        <h3 className="text-lg font-medium text-text">Add Comment</h3>
+                        <h3 className="text-lg font-medium text-text">{t('addComment')}</h3>
                         <button
                             onClick={onClose}
                             className="text-text/50 hover:text-text transition-colors"
@@ -63,18 +65,18 @@ const CommentModal = ({ isOpen, onClose, capsule }) => {
 
                 <div className="p-4">
                     <div className="mb-4">
-                        <p className="text-sm text-text/70 mb-2">Commenting on: <span className="font-medium text-text">{capsule.title}</span></p>
+                        <p className="text-sm text-text/70 mb-2">{t('commentingOn')}: <span className="font-medium text-text">{capsule.title}</span></p>
                     </div>
 
                     <form onSubmit={handleSubmit}>
-            <textarea
-                value={comment}
-                onChange={(e) => setComment(e.target.value)}
-                placeholder="Write your comment..."
-                className="w-full p-3 rounded-lg bg-white/5 border border-white/10 text-text resize-none min-h-24"
-                required
-                maxLength={90}
-            />
+                        <textarea
+                            value={comment}
+                            onChange={(e) => setComment(e.target.value)}
+                            placeholder={t('addCommentHere')}
+                            className="w-full p-3 rounded-lg bg-white/5 border border-white/10 text-text resize-none min-h-24"
+                            required
+                            maxLength={90}
+                        />
 
                         {error && (
                             <div className="mt-2 text-red-500 text-sm">
@@ -88,7 +90,7 @@ const CommentModal = ({ isOpen, onClose, capsule }) => {
                                 onClick={onClose}
                                 className="px-4 py-2 text-text/70 hover:text-text mr-2"
                             >
-                                Cancel
+                                {t('cancel')}
                             </button>
                             <button
                                 type="submit"
@@ -97,7 +99,7 @@ const CommentModal = ({ isOpen, onClose, capsule }) => {
                                     isSubmitting || !comment.trim() ? 'opacity-50 cursor-not-allowed' : 'hover:bg-[#FF95DD]/90'
                                 }`}
                             >
-                                {isSubmitting ? 'Submitting...' : 'Post Comment'}
+                                {isSubmitting ? t('submitting') : t('postComment')}
                             </button>
                         </div>
                     </form>
